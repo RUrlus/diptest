@@ -34,7 +34,7 @@ def _generator(N, distance=0.5, sigma=1.0):
     """
     hd = distance / 2
     if N % 2 == 0:
-        lN = uN =N // 2
+        lN = uN = N // 2
     else:
         lN = int(np.ceil(N / 2))
         uN = N - lN
@@ -139,7 +139,6 @@ def test_dipstat_non_contiguous():
     assert not np.isnan(dip)
     assert not np.isinf(dip)
 
-
     dip = dt.dipstat(carr, sort_x=False)
     assert not np.isnan(dip)
     assert not np.isinf(dip)
@@ -164,6 +163,7 @@ def test_dipstat_2d():
     sample_2d = sample.reshape(5, 4).copy()
     with pytest.raises(TypeError):
         dip = dt.dipstat(sample_2d, sort_x=False)
+
 
 def test_diptest_default():
     """Test diptest.diptest with default settings."""
