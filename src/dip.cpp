@@ -129,7 +129,7 @@ long double compute_largest_distance_greater_than_dip(const double *arr, const i
         *iv = *iv + is_maj;
         *ix = *ix - (1 - is_maj);
 
-        if (dx >= ret_d) {
+        if (isgreaterequal(dx, ret_d)) {
 		    ret_d = dx;
 		    *ig = *ix + 1;
 		    *ih = *iv - is_maj;
