@@ -74,12 +74,13 @@ void compute_convex_m_indices(const double *arr, int *ret_idx, const std::vector
 void compute_dip(const double *arr, const int *convex_m, int rel_length, int idx, int offset, double *ret_dip, int *ret_dip_idx) {
     assert(offset == 0 || offset == 1);
     
-    double temp_dip = 1.;
-    int temp_dip_idx = -1;
     int sign = (offset == 0) ? 1 : -1;
+    *ret_dip = 0.;
     *ret_dip_idx = -1;  
 
     for (int j = idx; j < rel_length; ++j) {
+        double temp_dip = 1.;
+        int temp_dip_idx = -1;
         int  j_start = convex_m[j + 1 - offset], j_end = convex_m[j + offset];
 
         if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
@@ -88,7 +89,7 @@ void compute_dip(const double *arr, const int *convex_m, int rel_length, int idx
 
             for (int jj = j_start; jj <= j_end; ++jj) {
                 double d = sign * (
-                    (jj - j_start + 1) - (arr[jj] - arr[j_start]) * C
+                    (jj - j_start + sign) - (arr[jj] - arr[j_start]) * C
                 );
 
                 if (temp_dip < d) {
@@ -113,13 +114,14 @@ long double compute_largest_distance_greater_than_dip(const double *arr, const i
     do {
         int gcm_ix = gcm[*ix], lcm_iv = lcm[*iv];
         int is_maj = gcm_ix > lcm_iv;
+        int sign = (is_maj ? 1 : -1);
 
         int convex_m_ix = is_maj ? gcm_ix : lcm_iv;
         int convex_m_iv = is_maj ? lcm_iv : gcm_ix;
         int convex_m_i1 = is_maj ? gcm[*ix + 1] : lcm[*iv - 1];
 
-        long double dx = (is_maj ? 1 : -1) * (
-            (convex_m_iv - convex_m_i1 + 1) -
+        long double dx = sign * (
+            (convex_m_iv - convex_m_i1 + sign) -
             ((long double) arr[convex_m_iv] - arr[convex_m_i1]) * 
                 (convex_m_ix - convex_m_i1) / 
                 (arr[convex_m_ix] - arr[convex_m_i1])

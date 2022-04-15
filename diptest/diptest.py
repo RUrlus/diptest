@@ -183,7 +183,6 @@ def diptest(
             n=n,
             n_boot=n_boot,
             allow_zero=allow_zero,
-            debug = 1,
             seed=seed or 0
         )
         return dip, pval

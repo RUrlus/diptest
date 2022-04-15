@@ -36,6 +36,7 @@ if DEV:
 with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
 
+
 def write_version_py(filename: str = 'diptest/version.py') -> None:
     """Write package version to version.py.
 
