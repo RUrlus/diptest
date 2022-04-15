@@ -11,10 +11,6 @@
 #include <omp.h>
 #endif
 
-extern "C" {
-#include <diptest/diptest.h>
-}
-
 #include <algorithm>  // sort
 #include <cmath>      // NAN
 #include <memory>     // unique_ptr
@@ -23,6 +19,7 @@ extern "C" {
 #include <stdexcept>  // runtime_error
 
 #include <diptest/pcg64.hpp>
+#include <diptest/dip.hpp>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) \
     || defined(__BORLANDC__)

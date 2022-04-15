@@ -162,7 +162,6 @@ def diptest(
         warnings.warn('Dip test is not valid for n <= 3')
         return dip, 1.0
 
-
     if boot_pval:
         n_threads = n_threads or 4
         if n_threads == -1:
@@ -184,6 +183,7 @@ def diptest(
             n=n,
             n_boot=n_boot,
             allow_zero=allow_zero,
+            debug = 1,
             seed=seed or 0
         )
         return dip, pval
