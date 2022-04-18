@@ -1,6 +1,10 @@
 #ifndef INCLUDE_DIPTEST_DIP_HPP_
 #define INCLUDE_DIPTEST_DIP_HPP_
-#define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(expr)  \
+    do                \
+    {                 \
+        (void)(expr); \
+    } while (0)
 
 #include <iterator> // for iterators
 #include <vector>   // for vectors
@@ -11,7 +15,11 @@
 
 using namespace std;
 
-enum ConvexEnvelopeType { MAJORANT, MINORANT };
+enum ConvexEnvelopeType
+{
+    MAJORANT,
+    MINORANT
+};
 
 class DipValue
 {
@@ -20,28 +28,35 @@ public:
     int idx;
 
     // Constructor:
-    DipValue(double val, int idx): val(val), idx(idx) {};
-    DipValue(bool min_is_0): idx(-1) { val = (min_is_0) ? 0. : 1.; };
+    DipValue(double val, int idx) : val(val), idx(idx){};
+    DipValue(bool min_is_0) : idx(-1) { val = (min_is_0) ? 0. : 1.; };
 
     // Methods:
-    void update(double value, int index) { val = value; idx = index; }
+    void update(double value, int index)
+    {
+        val = value;
+        idx = index;
+    }
 
-    void update(DipValue &other) { val = other.val; idx = other.idx; } 
+    void update(DipValue &other)
+    {
+        val = other.val;
+        idx = other.idx;
+    }
 
-    void maybe_update(double value, int index) {
-        if (val < value) {
+    void maybe_update(double value, int index)
+    {
+        if (val < value)
+        {
             val = value;
             idx = index;
         }
     }
 
-    void maybe_update(DipValue &other) {
-        if (val < other.val) {
-            val = other.val;
-            idx = other.idx;
-        }
+    void maybe_update(DipValue &other)
+    {
+        maybe_update(other.val, other.idx); 
     }
-
 };
 
 class ConvexEnvelope
@@ -59,15 +74,14 @@ public:
         int *optimum,
         int *indices,
         int size,
-        ConvexEnvelopeType type):
-            arr(arr), optimum(optimum), indices(indices), size(size), type(type) {};
-        
-        /* Establish the indices   mn[1..n]  over which combination is necessary
-           for the convex MINORANT (GCM) fit.
-         */
-        void compute_indices();
+        ConvexEnvelopeType type) : arr(arr), optimum(optimum), indices(indices), size(size), type(type){};
 
-        DipValue compute_dip();
+    /* Establish the indices   mn[1..n]  over which combination is necessary
+       for the convex MINORANT (GCM) fit.
+     */
+    void compute_indices();
+
+    DipValue compute_dip();
 };
 
 /* Subroutine */
@@ -81,7 +95,6 @@ double diptst(
     int *mn,
     int *mj,
     const int min_is_0,
-    const int debug
-);
+    const int debug);
 
-#endif  // INCLUDE_DIPTEST_DIP_HPP_
+#endif // INCLUDE_DIPTEST_DIP_HPP_
