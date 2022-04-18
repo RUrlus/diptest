@@ -39,49 +39,59 @@
                        gave wrong result (larger dip than possible) in some cases
    $Id: dip.c,v 1.26 2012/08/13 16:44:11 maechler Exp $
 */
-#include <diptest/dip.hpp>
+#include <diptest/diptest.hpp>
 
-void compute_convex_m_indices(const double *arr, int *ret_idx, const std::vector<int>& range) {
+
+void ConvexEnvelope::compute_indices() {
+    vector<int> range;
+    int sign = 1, offset = 0;
+    if (type == MAJORANT) {
+        sign = -1; offset = size + 1;
+    }
+
+    for(int i = 1; i <= size; i++) {
+        range.push_back(offset + sign * i);
+    }
+
     vector<int>::const_iterator curr_idx = range.begin();
     vector<int>::const_iterator next_idx = next(curr_idx, 1);
     
-    int begin_v = *curr_idx;
-    ret_idx[begin_v] = begin_v;
+    int range_start = *curr_idx;
+    indices[range_start] = range_start;
 
     for (; next_idx < range.end(); curr_idx++, next_idx++)  {
-        ret_idx[*next_idx] = *curr_idx;
+        indices[*next_idx] = *curr_idx;
         
         while(1) {
-            int next_v = ret_idx[*next_idx];
-            int next_v_iter = ret_idx[next_v];
+            int opt_at_nxt = indices[*next_idx];
+            int opt_at_nxt_iter = indices[opt_at_nxt];
 
             /*
              * We compare the rate of change function of arr at the indices:
-             *      a. (*next_idx, next_v)
-             *      b. (next_v, next_v_iter)
+             *      a. (*next_idx, opt_at_nxt)
+             *      b. (opt_at_nxt, opt_at_nxt_iter)
              */
             bool rate_change_flag = 
-                (arr[*next_idx]  - arr[next_v])  * (next_v - next_v_iter) <
-                (arr[next_v] - arr[next_v_iter]) * (*next_idx - next_v);
+                (arr[*next_idx] - arr[opt_at_nxt]) * (opt_at_nxt - opt_at_nxt_iter) <
+                (arr[opt_at_nxt] - arr[opt_at_nxt_iter]) * (*next_idx - opt_at_nxt);
             
-            if (next_v_iter == begin_v || rate_change_flag) 
+            if (opt_at_nxt_iter == range_start || rate_change_flag) 
                 break;
-            ret_idx[*next_idx] = next_v_iter;
+            indices[*next_idx] = opt_at_nxt_iter;
         }
     }
 }
 
-void compute_dip(const double *arr, const int *convex_m, int rel_length, int idx, int offset, double *ret_dip, int *ret_dip_idx) {
-    assert(offset == 0 || offset == 1);
+DipValue ConvexEnvelope::compute_dip() {
     
-    int sign = (offset == 0) ? 1 : -1;
-    *ret_dip = 0.;
-    *ret_dip_idx = -1;  
+    int offset = (type == MINORANT) ? 0 : 1;
+    int sign = 1 + -2 * offset;
 
-    for (int j = idx; j < rel_length; ++j) {
-        double temp_dip = 1.;
-        int temp_dip_idx = -1;
-        int  j_start = convex_m[j + 1 - offset], j_end = convex_m[j + offset];
+    DipValue ret_dip(0., -1);
+    DipValue tmp_dip(1., -1);
+
+    for (int j = x; j < rel_length; ++j) {
+        int j_start = optimum[j + 1 - offset], j_end = optimum[j + offset];
 
         if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
 
@@ -92,67 +102,74 @@ void compute_dip(const double *arr, const int *convex_m, int rel_length, int idx
                     (jj - j_start + sign) - (arr[jj] - arr[j_start]) * C
                 );
 
-                if (temp_dip < d) {
-                    temp_dip = d; temp_dip_idx = jj;
-                }
+                tmp_dip.maybe_update(d, jj);
             }
         }
 
-        if (*ret_dip < temp_dip) {
-            *ret_dip = temp_dip; *ret_dip_idx = temp_dip_idx;
-        }
-        temp_dip = 1.; temp_dip_idx = -1;
+        ret_dip.maybe_update(tmp_dip);
+        tmp_dip.update(1., -1);
     }
+
+    return ret_dip;
 }
 
-long double compute_largest_distance_greater_than_dip(const double *arr, const int *gcm, const int *lcm, int *ig, int *ix, int *ih, int *iv, int l_lcm, int debug) {
+double max_distance(ConvexEnvelope &gcm, ConvexEnvelope &lcm, int debug) {
     /*	Find the largest distance greater than 'DIP' between the GCM and
         the LCM from LOW to HIGH.
     */
+    assert(gcm.type != lcm.type && gcm.type == MINORANT);
+
+    const double *arr = gcm.arr;
     long double ret_d = 0.;
     
     do {
-        int gcm_ix = gcm[*ix], lcm_iv = lcm[*iv];
-        int is_maj = gcm_ix > lcm_iv;
-        int sign = (is_maj ? 1 : -1);
+        int gcm_y = gcm.optimum[gcm.y], lcm_y = lcm.optimum[lcm.y];
+        int is_maj = gcm_y > lcm_y;
+        int i, j, i1, sign;
 
-        int convex_m_ix = is_maj ? gcm_ix : lcm_iv;
-        int convex_m_iv = is_maj ? lcm_iv : gcm_ix;
-        int convex_m_i1 = is_maj ? gcm[*ix + 1] : lcm[*iv - 1];
+        if (is_maj) {
+            i = gcm_y; j = lcm_y; i1 = gcm.optimum[gcm.y + 1];
+            sign = 1;
+        } else {
+            j = gcm_y; i = lcm_y; i1 = lcm.optimum[lcm.y - 1];
+            sign = -1;
+        }
 
         long double dx = sign * (
-            (convex_m_iv - convex_m_i1 + sign) -
-            ((long double) arr[convex_m_iv] - arr[convex_m_i1]) * 
-                (convex_m_ix - convex_m_i1) / 
-                (arr[convex_m_ix] - arr[convex_m_i1])
+            (j - i1 + sign) - 
+            ((long double) arr[j] - arr[i1]) * (i - i1) / (arr[i] - arr[i1])
         );
-        *iv = *iv + is_maj;
-        *ix = *ix - (1 - is_maj);
+        gcm.y -= (1 - is_maj);
+        lcm.y += is_maj;
 
         if (isgreaterequal(dx, ret_d)) {
 		    ret_d = dx;
-		    *ig = *ix + 1;
-		    *ih = *iv - is_maj;
+		    gcm.x = gcm.y + 1;
+		    lcm.x = lcm.y - is_maj;
 #if defined (DIPTEST_DEBUG)
 		    if(debug >= 2) {
-                cout << ((is_maj) ? "G" : "L") << "(" << (*ig) << ", " << (*ih) << ")";
+                cout << ((is_maj) ? "G" : "L") 
+                     << "(" << (gcm.x) << ", " << (lcm.x) << ")";
             }
 #endif // DIPTEST_DEBUG
-	    }
-        if (*ix < 1)	 *ix = 1;
-	    if (*iv > l_lcm) *iv = l_lcm;
+        }
+        if (gcm.y < 1)
+            gcm.y = 1;
+        if (lcm.y > lcm.rel_length)
+            lcm.y = lcm.rel_length;
 
 #if defined (DIPTEST_DEBUG)
 	  if(debug) {
 	      if (debug >= 2) {
-            cout << " --> (ix, iv) = (" << (*ix) << ", " << (*iv) << ")" << endl;
+            cout << " --> (gcm.y, lcm.y) = (" 
+                 << (gcm.y) << ", " << (lcm.y) << ")" << endl;
         } else { 
             cout << ".";
         }
 	  }
 #endif // DIPTEST_DEBUG
 
-    } while (gcm[*ix] != lcm[*iv]);
+    } while (gcm.optimum[gcm.y] != lcm.optimum[lcm.y]);
 
     return ret_d;
 }
@@ -177,27 +194,23 @@ double diptst(
  */
 #define low   lo_hi[0]
 #define high  lo_hi[1]
-/* 
- * *l_gcm* is defined as: relevant_length(GCM).
- * *l_lcm* is defined as: relevant_length(LCM)
- */
-#define l_gcm lo_hi[2]
-#define l_lcm lo_hi[3]
 
 #ifndef DIPTEST_DEBUG
     UNUSED(debug);
 #endif
-    vector<int> range;
-    double dip = (min_is_0) ? 0. : 1., dip_l, dip_u, tmp_max_dip;
     long double d = 0.; // TODO: check if with this 32-bit/64-bit differences go
-    int ig, ih, iv, ix, i;
-    int j_best, j_l, j_u;
+    double dip = (min_is_0) ? 0. : 1.;
+    DipValue dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
+    int i;
     bool flag;
 
     /* Parameter adjustments, so that array referencing starts at 1,
        i.e., x[1]..x[n] 
     */
     --mj; --mn; --lcm; --gcm; --x;
+
+    ConvexEnvelope gcm_obj(x, gcm, mn, n, MINORANT);
+    ConvexEnvelope lcm_obj(x, lcm, mj, n, MAJORANT);
 
     /* Consistency Checks */
 
@@ -226,19 +239,15 @@ double diptst(
 #endif // DIPTEST_DEBUG
 
     /* Establish the indices   mn[1..n]  over which combination is necessary
-       for the convex MINORANT (GCM) fit.
-    */
-    for( i = 1; i <= n; i++ )
-        range.push_back(i);
-    compute_convex_m_indices(x, mn, range);
+     * for the convex MINORANT (GCM) fit.
+     */
+    gcm_obj.compute_indices();
 
     /* Establish the indices   mj[1..n]  over which combination is necessary
-        for the concave MAJORANT (LCM) fit.
-    */
-    reverse(range.begin(), range.end());
-    compute_convex_m_indices(x, mj, range);
-
-
+     * for the concave MAJORANT (LCM) fit.
+     */
+    lcm_obj.compute_indices();
+    
     /* ------------------------- Start the cycling. ------------------------- */
     do {
 
@@ -246,15 +255,22 @@ double diptst(
         gcm[1] = high;
         for(i = 1; gcm[i] > low; i++)
             gcm[i+1] = mn[gcm[i]];
-        ig = l_gcm = i; // l_gcm == relevant_length(GCM)
-        ix = ig - 1;   //  ix, ig  are counters for the convex minorant.
+        gcm_obj.x = gcm_obj.rel_length = i; // relevant_length(GCM)
+        gcm_obj.y = gcm_obj.x - 1;
 
         /* Collect the change points for the LCM from *high* to *low*. */
         lcm[1] = low;
         for(i = 1; lcm[i] < high; i++)
             lcm[i+1] = mj[lcm[i]];
-        ih = l_lcm = i; // l_lcm == relevant_length(LCM)
-        iv = 2;        //  iv, ih  are counters for the concave majorant.
+        lcm_obj.x = lcm_obj.rel_length = i; // relevant_length(GCM)
+        lcm_obj.y = 2;
+
+        /* 
+        * *l_gcm* is defined as: relevant_length(GCM).
+        * *l_lcm* is defined as: relevant_length(LCM)
+        */
+        #define l_gcm (gcm_obj.rel_length)
+        #define l_lcm (lcm_obj.rel_length)
 
 #if defined (DIPTEST_DEBUG)
         if(debug) {
@@ -283,7 +299,8 @@ double diptst(
         if (l_gcm != 2 || l_lcm != 2) {
 #if defined (DIPTEST_DEBUG)
             if(debug) {
-                cout << "'dip': CYCLE-BEGIN: while(gcm[ix] != lcm[iv])";
+                cout << "'dip': CYCLE-BEGIN: while(gcm[gcm_obj.y] "
+                     << "!= lcm[lcm_obj.y])";
                 if (debug >= 2) {
                     cout << endl;
                 } else {
@@ -292,9 +309,7 @@ double diptst(
             }
 #endif // DIPTEST_DEBUG
 
-            d = compute_largest_distance_greater_than_dip(
-                    x, gcm, lcm, &ig, &ix, &ih, &iv, l_lcm, debug
-            );
+            d = max_distance(gcm_obj, lcm_obj, debug);
 
 #if defined (DIPTEST_DEBUG)      
             if(debug && debug < 2) cout << endl;
@@ -304,62 +319,62 @@ double diptst(
 	        d = (min_is_0) ? 0. : 1.;
 
 #if defined (DIPTEST_DEBUG)
-	if(debug)
-        cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = ("
-             << setw(2) << l_lcm << ", " 
-             << setw(2) << l_gcm << ") ==> d := "
-             << d << endl;
+	        if(debug)
+                cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = ("
+                     << setw(2) << l_lcm << ", " 
+                     << setw(2) << l_gcm << ") ==> d := "
+                     << d << endl;
 #endif // DIPTEST_DEBUG
-    }
+        }
     
     if (d < dip) goto L_END;
 
-/*     Calculate the DIPs for the current LOW and HIGH. */
+    /* Calculate the DIPs for the current LOW and HIGH: */
 #if defined (DIPTEST_DEBUG)
     if(debug) cout << "'dip': MAIN-CALCULATION" << endl;
 #endif // DIPTEST_DEBUG
 
     /* The DIP for the convex minorant. */
-    compute_dip(x, gcm, l_gcm, ig, 0, &dip_l, &j_l);
+    dip_l = gcm_obj.compute_dip();
 
     /* The DIP for the concave majorant. */
-    compute_dip(x, lcm, l_lcm, ih, 1, &dip_u, &j_u);
+    dip_u = lcm_obj.compute_dip();
 
 #if defined (DIPTEST_DEBUG)
     if(debug)
         cout << " (dip_l, dip_u) = ("
-             << dip_l << ", " 
-             << dip_u << ")"; 
+             << dip_l.val << ", " 
+             << dip_u.val << ")"; 
 #endif // DIPTEST_DEBUG
 
     /* Determine the current maximum. */
-    if(dip_u > dip_l) {
-	    tmp_max_dip = dip_u; j_best = j_u;
+    if(dip_l.val < dip_u.val) {
+        tmp_dip.update(dip_u);
     } else {
-	    tmp_max_dip = dip_l; j_best = j_l;
+	    tmp_dip.update(dip_l);
     }
-    if (dip < tmp_max_dip) {
-	    dip = tmp_max_dip;
+    if (dip < tmp_dip.val) {
+	    dip = tmp_dip.val;
 #if defined (DIPTEST_DEBUG)
 	    if(debug)
-            cout << " --> new larger dip " << tmp_max_dip
-                 << " ( at index := " << j_best
+            cout << " --> new larger dip " << (tmp_dip.val)
+                 << " ( at index := " << (tmp_dip.idx)
                  << " )" << endl;
 #endif // DIPTEST_DEBUG
     }
 
-    flag = (low == gcm[ig] && high == lcm[ih]);
-    low  = gcm[ig];
-	high = lcm[ih];
-
-#if defined (DIPTEST_DEBUG)
-    if (flag && debug)
-        cout << "'dip': LOOP-END: No improvement found neither in low := "
-             << low << " nor in high := " << high << endl;
-#endif // DIPTEST_DEBUG
+    flag = (low == gcm[gcm_obj.x] && high == lcm[lcm_obj.x]);
+    low  = gcm[gcm_obj.x];
+	high = lcm[lcm_obj.x];
 
 } while (!flag);
 /*---------------------------------------------------------------------------*/
+
+#if defined (DIPTEST_DEBUG)
+    if (debug)
+        cout << "'dip': LOOP-END: No improvement found neither in low := "
+             << low << " nor in high := " << high << endl;
+#endif // DIPTEST_DEBUG
 
 L_END:
     /*  
@@ -367,6 +382,8 @@ L_END:
      * It saves many divisions by n!
      */    
     dip /= (2*n);
+    lo_hi[2] = l_gcm;
+    lo_hi[3] = l_lcm;
     return dip;
 } /* diptst */
 #undef low
