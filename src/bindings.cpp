@@ -3,6 +3,9 @@
  */
 #include <pybind11/pybind11.h>
 #include <diptest/wrapper.hpp>
+#if defined(DIPTEST_BUILD_CPP_TESTS)
+#include <diptest/test_pcg.hpp>
+#endif // DIPTEST_BULD_CPP_TESTS
 
 namespace diptest {
 namespace bindings {
@@ -14,6 +17,14 @@ PYBIND11_MODULE(EXTENSION_MODULE_NAME, m) {
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
     bind_diptest_pval_mt(m);
 #endif
+
+#if defined(DIPTEST_BUILD_CPP_TESTS)
+    bind_pcg_seed_test(m);
+    bind_pcg_set_stream_test(m);
+#if defined(DIPTEST_HAS_OPENMP_SUPPORT)
+    bind_pcg_mt_stream_test(m);
+#endif // DIPTEST_HAS_OPENMP_SUPPORT
+#endif // DIPTEST_BULD_CPP_TESTS
 
 #ifndef OS_WIN
 #ifdef DIPTEST_VERSION_INFO

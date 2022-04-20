@@ -111,6 +111,12 @@ jobs:
           python -m pip install numpy pytest
           
       - name: Install
+        if: runner.os == 'Linux'
+        run: |
+          CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON" pip install . -v
+
+      - name: Install
+        if: runner.os != 'Linux'
         run: |
           pip install . -v
 

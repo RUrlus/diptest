@@ -18,8 +18,8 @@ extern "C" {
 #include <random>     // mt19937_64, uniform_real_distribution
 #include <stdexcept>  // runtime_error
 
-#include "pcg_random.hpp"
-#include "pcg_extras.hpp"
+#include <pcg_random.hpp>
+#include <pcg_extras.hpp>
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
 #include <omp.h>
