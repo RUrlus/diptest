@@ -1,5 +1,11 @@
 # Diptest Changelog
 
+## v0.3.0 -- April 2022
+
+### Changes
+
+* Switch to PCG64-DXSM RNG from Mersenne twister
+
 ## v0.2.3 -- April 2022
 
 Patch release
