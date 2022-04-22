@@ -15,9 +15,7 @@
 #include <random> // uniform_real_distribution
 #include <cstddef>
 
-#include <pcg_random.hpp>
-#include <pcg_extras.hpp>
-
+#include <diptest/pcg64.hpp>
 
 namespace py = pybind11;
 

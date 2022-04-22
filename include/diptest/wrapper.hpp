@@ -7,6 +7,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#if defined(DIPTEST_HAS_OPENMP_SUPPORT)
+#include <omp.h>
+#endif
+
 extern "C" {
 #include <diptest/diptest.h>
 }
@@ -15,15 +19,10 @@ extern "C" {
 #include <cmath>      // NAN
 #include <memory>     // unique_ptr
 #include <numeric>    // accumulate
-#include <random>     // mt19937_64, uniform_real_distribution
+#include <random>     // uniform_real_distribution
 #include <stdexcept>  // runtime_error
 
-#include <pcg_random.hpp>
-#include <pcg_extras.hpp>
-
-#if defined(DIPTEST_HAS_OPENMP_SUPPORT)
-#include <omp.h>
-#endif
+#include <diptest/pcg64.hpp>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) \
     || defined(__BORLANDC__)

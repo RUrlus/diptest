@@ -73,9 +73,9 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
 
 double
 diptest_pval(const double dipstat, const int64_t n, const int64_t n_boot, int allow_zero, int debug, uint64_t seed) {
-    pcg64 rng;
+    pcg64_dxsm rng;
     if (seed == 0) {
-        pcg_extras::seed_seq_from<std::random_device> seed_source;
+        pcg_seed_seq seed_source;
         rng.seed(seed_source);
     } else {
         rng.seed(seed);
@@ -118,9 +118,9 @@ double diptest_pval_mt(
     size_t n_threads) {
 
     std::unique_ptr<bool[]> dips(new bool[n_boot]);
-    pcg64 global_rng;
+    pcg64_dxsm global_rng;
     if (seed == 0) {
-        pcg_extras::seed_seq_from<std::random_device> seed_source;
+        pcg_seed_seq seed_source;
         global_rng.seed(seed_source);
     } else {
         global_rng.seed(seed);
@@ -143,7 +143,7 @@ double diptest_pval_mt(
         // PCG family has different streams which are, in theory, independent of each other.
         // Hence, we can use the same seed and a different stream to draw independent samples
         // from each thread without having to allocate the whole block
-        pcg64 rng = global_rng;
+        pcg64_dxsm rng = global_rng;
         rng.set_stream(omp_get_thread_num() + 1);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
 

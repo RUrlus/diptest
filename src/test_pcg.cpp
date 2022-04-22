@@ -12,9 +12,9 @@ py::array_t<double> pcg_seed_test(const size_t size, const uint64_t seed) {
     // allocate the return array
     py::array_t<double> arr(size);
     // declare and initialise the RNG
-    pcg64 rng;
+    pcg64_dxsm rng;
     if (seed == 0) {
-        pcg_extras::seed_seq_from<std::random_device> seed_source;
+        pcg_seed_seq seed_source;
         rng.seed(seed_source);
     } else {
         rng.seed(seed);
@@ -34,9 +34,9 @@ py::array_t<double> pcg_set_stream_test(
     // allocate the return array
     py::array_t<double> arr(size * n_streams);
     // declare and initialise the RNG
-    pcg64 rng;
+    pcg64_dxsm rng;
     if (seed == 0) {
-        pcg_extras::seed_seq_from<std::random_device> seed_source;
+        pcg_seed_seq seed_source;
         rng.seed(seed_source);
     } else {
         rng.seed(seed);
@@ -61,9 +61,9 @@ py::array_t<double> pcg_mt_stream_test(
     const uint64_t seed,
     const int n_threads
 ) {
-    pcg64 global_rng;
+    pcg64_dxsm global_rng;
     if (seed == 0) {
-        pcg_extras::seed_seq_from<std::random_device> seed_source;
+        pcg_seed_seq seed_source;
         global_rng.seed(seed_source);
     } else {
         global_rng.seed(seed);
@@ -75,7 +75,7 @@ py::array_t<double> pcg_mt_stream_test(
 
 #pragma omp parallel num_threads(n_threads) shared(ptr, global_rng)
     {
-    pcg64 rng = global_rng;
+    pcg64_dxsm rng = global_rng;
     rng.set_stream(omp_get_thread_num() + 1);
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
