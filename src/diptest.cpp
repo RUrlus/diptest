@@ -151,7 +151,7 @@ double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
         gcm.y -= (1 - is_maj);
         lcm.y += is_maj;
 
-        if (isgreaterequal(dx, ret_d)) {
+        if (std::isgreaterequal(dx, ret_d)) {
             ret_d = dx;
             gcm.x = gcm.y + 1;
             lcm.x = lcm.y - is_maj;
