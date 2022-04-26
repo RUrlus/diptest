@@ -39,11 +39,11 @@ enum ConvexEnvelopeType { MAJORANT, MINORANT };
  * @param idx the index at which the dip value is reported
  */
 class Dip {
-   public:
+ public:
     double val;
     int idx;
 
-    /// Constructors:
+    // Constructors:
 
     Dip(double val, int idx) : val(val), idx(idx) {}
     /**
@@ -53,7 +53,7 @@ class Dip {
      */
     explicit Dip(bool min_is_0) : idx(-1) { val = (min_is_0) ? 0. : 1.; }
 
-    /// Methods:
+    // Methods:
 
     /**
      * @brief Forces both the `val` and the `idx` to be updated with the given
@@ -65,7 +65,7 @@ class Dip {
     void update(double value, int index) {
         val = value;
         idx = index;
-    };
+    }
 
     /**
      * @brief Forces the two instances to have the same member variables
@@ -77,7 +77,7 @@ class Dip {
     void update(Dip& other) {
         val = other.val;
         idx = other.idx;
-    };
+    }
 
     /**
      * @brief An update operation that makes the two instances to have the same
@@ -117,19 +117,19 @@ class Dip {
  * @param type the type of the fit, i.e., either gcm or lcm fit
  */
 class ConvexEnvelope {
-   public:
+ public:
     const double* arr;
     int *optimum, *indices;
     const int size;
     const ConvexEnvelopeType type;
     int rel_length = -1, x = -1, y = -1;
 
-    /// Constructors:
+    // Constructors:
 
     ConvexEnvelope(const double* arr, int* optimum, int* indices, int size, ConvexEnvelopeType type)
-        : arr(arr), optimum(optimum), indices(indices), size(size), type(type){};
+        : arr(arr), optimum(optimum), indices(indices), size(size), type(type) {}
 
-    /// Methods:
+    // Methods:
 
     /**
      * @brief Establish the indices that are necessary for the convex minorant

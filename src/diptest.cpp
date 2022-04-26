@@ -113,7 +113,8 @@ Dip ConvexEnvelope::compute_dip() {
         }
 
         ret_dip.maybe_update(tmp_dip);
-        tmp_dip.update(1., -1);
+        tmp_dip.val = 1.;
+        tmp_dip.idx = -1;
     }
 
     return ret_dip;
@@ -158,7 +159,7 @@ double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
             if (debug >= 2) {
                 cout << ((is_maj) ? "G" : "L") << "(" << (gcm.x) << ", " << (lcm.x) << ")";
             }
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
         }
         if (gcm.y < 1)
             gcm.y = 1;
@@ -173,13 +174,13 @@ double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
                 cout << ".";
             }
         }
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
     } while (gcm.optimum[gcm.y] != lcm.optimum[lcm.y]);
 
     return ret_d;
 }
 
-/// Subroutine
+// Subroutine
 double diptst(
     const double x[],
     const int n,
@@ -202,7 +203,7 @@ double diptst(
 #ifndef DIPTEST_DEBUG
     UNUSED(debug);
 #endif
-    long double d = 0.;  /// TODO: check if this makes 32/64-bit differences go
+    long double d = 0.;  // TODO: check if this makes 32/64-bit differences go
     double dip = (min_is_0) ? 0. : 1.;
     Dip dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
     int i;
@@ -221,15 +222,15 @@ double diptst(
     ConvexEnvelope gcm_obj(x, gcm, mn, n, MINORANT);
     ConvexEnvelope lcm_obj(x, lcm, mj, n, MAJORANT);
 
-    /// Perform the two consistency checks:
+    // Perform the two consistency checks:
 
-    /// A. non-positive check:
+    // A. non-positive check:
     if (n <= 0) {
         *ifault = 1;
         return 0.0;
     }
 
-    /// B. non-sorted array check:
+    // B. non-sorted array check:
     for (i = 2; i <= n; ++i)
         if (x[i] < x[i - 1]) {
             *ifault = 2;
@@ -246,7 +247,7 @@ double diptst(
     if (debug)
         cout << "'dip': START: (N = " << n << ")"
              << " and 2N*dip = " << dip << "." << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
 
     /**
      * Establish the indices   mn[1..n]  over which combination is necessary
@@ -260,20 +261,20 @@ double diptst(
      */
     lcm_obj.compute_indices();
 
-    /// ------------------------- Start the cycling. -------------------------
+    // ------------------------- Start the cycling. -------------------------
     do {
-        /// Collect the change points for the GCM from `high` to `low`.
+        // Collect the change points for the GCM from `high` to `low`.
         gcm[1] = high;
         for (i = 1; gcm[i] > low; i++)
             gcm[i + 1] = mn[gcm[i]];
-        gcm_obj.x = gcm_obj.rel_length = i;  ///< relevant_length(GCM)
+        gcm_obj.x = gcm_obj.rel_length = i;  //< relevant_length(GCM)
         gcm_obj.y = gcm_obj.x - 1;
 
-        /// Collect the change points for the LCM from `high` to `low`.
+        // Collect the change points for the LCM from `high` to `low`.
         lcm[1] = low;
         for (i = 1; lcm[i] < high; i++)
             lcm[i + 1] = mj[lcm[i]];
-        lcm_obj.x = lcm_obj.rel_length = i;  ///< relevant_length(GCM)
+        lcm_obj.x = lcm_obj.rel_length = i;  //< relevant_length(GCM)
         lcm_obj.y = 2;
 
 /**
@@ -288,21 +289,21 @@ double diptst(
             cout << "'dip': LOOP-BEGIN: 2n*D = " << dip << " and [low, high] = [" << setw(3) << low << ", " << setw(3)
                  << high << "]";
             if (debug >= 3) {
-                /// Print the GCM:
+                // Print the GCM:
                 cout << " :" << endl << " gcm[1:" << l_gcm << "] = ";
                 for (i = 1; i < l_gcm; i++)
                     cout << gcm[i] << ", ";
                 cout << gcm[l_gcm] << endl;
-                /// Print the LCM:
+                // Print the LCM:
                 cout << " lcm[1:" << l_lcm << "] = ";
                 for (i = 1; i < l_lcm; i++)
                     cout << lcm[i] << ", ";
                 cout << lcm[l_lcm] << endl;
-            } else {  /// debug <= 2
+            } else {  // debug <= 2
                 cout << "; (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", " << setw(2) << l_gcm << ")" << endl;
             }
         }
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
         /**
          * Find the largest distance greater than 'DIP' between
          * the GCM and the LCM from LOW to HIGH.
@@ -318,14 +319,14 @@ double diptst(
                     cout << " ";
                 }
             }
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
 
             d = max_distance(gcm_obj, lcm_obj, debug);
 
 #if defined(DIPTEST_DEBUG)
             if (debug && debug < 2)
                 cout << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
         } else {
             d = (min_is_0) ? 0. : 1.;
 
@@ -333,30 +334,30 @@ double diptst(
             if (debug)
                 cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", " << setw(2) << l_gcm
                      << ") ==> d := " << d << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
         }
 
         if (d < dip)
             goto L_END;
 
-            /// Calculate the DIPs for the current LOW and HIGH
+            // Calculate the DIPs for the current LOW and HIGH
 #if defined(DIPTEST_DEBUG)
         if (debug)
             cout << "'dip': MAIN-CALCULATION" << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
 
-        /// The DIP for the convex minorant.
+        // The DIP for the convex minorant.
         dip_l = gcm_obj.compute_dip();
 
-        /// The DIP for the concave majorant.
+        // The DIP for the concave majorant.
         dip_u = lcm_obj.compute_dip();
 
 #if defined(DIPTEST_DEBUG)
         if (debug)
             cout << " (dip_l, dip_u) = (" << dip_l.val << ", " << dip_u.val << ")";
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
 
-        /// Determine the current maximum.
+        // Determine the current maximum.
         if (dip_l.val < dip_u.val) {
             tmp_dip.update(dip_u);
         } else {
@@ -367,19 +368,19 @@ double diptst(
 #if defined(DIPTEST_DEBUG)
             if (debug)
                 cout << " --> new larger dip " << (tmp_dip.val) << " ( at index := " << (tmp_dip.idx) << " )" << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
         }
 
         flag = (low == gcm[gcm_obj.x] && high == lcm[lcm_obj.x]);
         low = gcm[gcm_obj.x];
         high = lcm[lcm_obj.x];
     } while (!flag);
-    /// ------------------------- end of the cycling. -------------------------
+    // ------------------------- end of the cycling. -------------------------
 
 #if defined(DIPTEST_DEBUG)
     if (debug)
         cout << "'dip': LOOP-END: No improvement found neither in low := " << low << " nor in high := " << high << endl;
-#endif  /// DIPTEST_DEBUG
+#endif  // DIPTEST_DEBUG
 
 L_END:
     /**
@@ -390,7 +391,7 @@ L_END:
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
     return dip;
-}  /// diptst
+}  // diptst
 #undef low
 #undef high
 #undef l_gcm
