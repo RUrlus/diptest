@@ -4,37 +4,30 @@
  * @brief header file including classes and methods helpful for dip calculation
  * @version 0.1
  * @date 2022-04-19
- * 
+ *
  * @copyright Copyright (c) 2022 Prodromos Kolyvakis
- * 
+ *
  */
-#ifndef INCLUDE_DIPTEST_DIP_HPP_
-#define INCLUDE_DIPTEST_DIP_HPP_
+#ifndef INCLUDE_DIPTEST_DIPTEST_HPP_
+#define INCLUDE_DIPTEST_DIPTEST_HPP_
 #define UNUSED(expr)  \
-    do                \
-    {                 \
+    do {              \
         (void)(expr); \
     } while (0)
 
-#include <iterator> // for iterators
-#include <vector>   // for vectors
-#include <cassert>  // for assert
-#include <iostream> // for cout
-#include <iomanip>  // for setw
-#include <cmath>    // for isgreaterequal
-
-using namespace std;
+#include <cassert>   // for assert
+#include <cmath>     // for isgreaterequal
+#include <iomanip>   // for setw
+#include <iostream>  // for cout
+#include <iterator>  // for iterators
+#include <vector>    // for vectors
 
 /**
  * @brief Enumerates the distinct types of functions that will be calculated
  * during the dip calculation
  *
  */
-enum ConvexEnvelopeType
-{
-    MAJORANT,
-    MINORANT
-};
+enum ConvexEnvelopeType { MAJORANT, MINORANT };
 
 /**
  * @brief Storage of the dip value and the index at which the value was reported.
@@ -45,15 +38,14 @@ enum ConvexEnvelopeType
  * @param val the dip value
  * @param idx the index at which the dip value is reported
  */
-class Dip
-{
-public:
+class Dip {
+   public:
     double val;
     int idx;
 
     /// Constructors:
 
-    Dip(double val, int idx) : val(val), idx(idx){};
+    Dip(double val, int idx) : val(val), idx(idx) {}
     /**
      * @brief Construct a new Dip object
      *
@@ -70,8 +62,7 @@ public:
      * @param value
      * @param index
      */
-    void update(double value, int index)
-    {
+    void update(double value, int index) {
         val = value;
         idx = index;
     };
@@ -83,8 +74,7 @@ public:
      *
      * @overload
      */
-    void update(Dip &other)
-    {
+    void update(Dip& other) {
         val = other.val;
         idx = other.idx;
     };
@@ -96,10 +86,8 @@ public:
      * @param value the value that the stored value will be compared against
      * @param index the index that the dip value is reported
      */
-    void maybe_update(double value, int index)
-    {
-        if (val < value)
-        {
+    void maybe_update(double value, int index) {
+        if (val < value) {
             val = value;
             idx = index;
         }
@@ -113,10 +101,7 @@ public:
      *
      * @overload
      */
-    void maybe_update(Dip &other)
-    {
-        maybe_update(other.val, other.idx);
-    }
+    void maybe_update(Dip& other) { maybe_update(other.val, other.idx); }
 };
 
 /**
@@ -131,24 +116,18 @@ public:
  * @param y a counter for the convex majorant (or minorant)
  * @param type the type of the fit, i.e., either gcm or lcm fit
  */
-class ConvexEnvelope
-{
-
-public:
-    const double *arr;
+class ConvexEnvelope {
+   public:
+    const double* arr;
     int *optimum, *indices;
     const int size;
     const ConvexEnvelopeType type;
     int rel_length = -1, x = -1, y = -1;
-    
+
     /// Constructors:
 
-    ConvexEnvelope(
-        const double *arr,
-        int *optimum,
-        int *indices,
-        int size,
-        ConvexEnvelopeType type) : arr(arr), optimum(optimum), indices(indices), size(size), type(type){};
+    ConvexEnvelope(const double* arr, int* optimum, int* indices, int size, ConvexEnvelopeType type)
+        : arr(arr), optimum(optimum), indices(indices), size(size), type(type){};
 
     /// Methods:
 
@@ -177,7 +156,7 @@ public:
  * `DDIPTEST_ENABLE_DEBUG=ON`
  * @return the maximum distance
  */
-double max_distance(ConvexEnvelope &gcm, ConvexEnvelope &lcm, int debug);
+double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug);
 
 /**
  * @brief Calculates the dip for an ordered vector X using the greatest convex
@@ -202,13 +181,13 @@ double max_distance(ConvexEnvelope &gcm, ConvexEnvelope &lcm, int debug);
 double diptst(
     const double x[],
     const int n,
-    int *lo_hi,
-    int *ifault,
-    int *gcm,
-    int *lcm,
-    int *mn,
-    int *mj,
+    int* lo_hi,
+    int* ifault,
+    int* gcm,
+    int* lcm,
+    int* mn,
+    int* mj,
     const int min_is_0,
     const int debug);
 
-#endif /// INCLUDE_DIPTEST_DIP_HPP_
+#endif  // INCLUDE_DIPTEST_DIPTEST_HPP_
