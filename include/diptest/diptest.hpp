@@ -18,10 +18,10 @@
 
 #include <iterator> // for iterators
 #include <vector>   // for vectors
-#include <assert.h> // for assert
+#include <cassert>  // for assert
 #include <iostream> // for cout
 #include <iomanip>  // for setw
-#include <math.h>   // for isgreaterequal
+#include <cmath>    // for isgreaterequal
 
 using namespace std;
 
@@ -136,10 +136,10 @@ class ConvexEnvelope
 
 public:
     const double *arr;
-    const int size;
     int *optimum, *indices;
-    int rel_length = -1, x = -1, y = -1;
+    const int size;
     const ConvexEnvelopeType type;
+    int rel_length = -1, x = -1, y = -1;
     
     /// Constructors:
 

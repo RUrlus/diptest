@@ -64,54 +64,42 @@
 
 void ConvexEnvelope::compute_indices()
 {
-    vector<int> range;
-    int sign = 1, offset = 0;
-    if (type == MAJORANT)
+    const int offset = (type == MINORANT) ? +1 : -1;
+    const int start = (type == MINORANT) ? 1 : size;
+    const int end = size + 1 - start;
+
+    indices[start] = start;
+
+    for (int i = start + offset; offset * (end - i) >= 0; i+=offset)
     {
-        sign = -1;
-        offset = size + 1;
-    }
-
-    for (int i = 1; i <= size; i++)
-    {
-        range.push_back(offset + sign * i);
-    }
-
-    vector<int>::const_iterator curr_idx = range.begin();
-    vector<int>::const_iterator next_idx = next(curr_idx, 1);
-
-    int range_start = *curr_idx;
-    indices[range_start] = range_start;
-
-    for (; next_idx < range.end(); curr_idx++, next_idx++)
-    {
-        indices[*next_idx] = *curr_idx;
+        indices[i] = i - offset;
 
         while (1)
         {
-            int opt_at_nxt = indices[*next_idx];
-            int opt_at_nxt_iter = indices[opt_at_nxt];
+            int ind_at_i = indices[i];
+            int ind_at_i_iter = indices[ind_at_i];
 
             /**
-             * We compare the rate of change function of arr at the indices:
-             *      a. (*next_idx, opt_at_nxt)
-             *      b. (opt_at_nxt, opt_at_nxt_iter)
+             * We compare the rate of change of arr, i.e., (arr[x]-arr[y])/(x-y), 
+             * at the indices:
+             *      a. (i, ind_at_i)
+             *      b. (ind_at_i, ind_at_i_iter)
              */
             bool rate_change_flag =
-                (arr[*next_idx] - arr[opt_at_nxt]) * (opt_at_nxt - opt_at_nxt_iter) <
-                (arr[opt_at_nxt] - arr[opt_at_nxt_iter]) * (*next_idx - opt_at_nxt);
+                (arr[i] - arr[ind_at_i]) * (ind_at_i - ind_at_i_iter) <
+                (arr[ind_at_i] - arr[ind_at_i_iter]) * (i - ind_at_i);
 
-            if (opt_at_nxt_iter == range_start || rate_change_flag)
+            if (ind_at_i == start || rate_change_flag)
                 break;
-            indices[*next_idx] = opt_at_nxt_iter;
+            indices[i] = ind_at_i_iter;
         }
     }
 }
 
 Dip ConvexEnvelope::compute_dip()
 {
-    int offset = (type == MINORANT) ? 0 : 1;
-    int sign = 1 + -2 * offset;
+    const int offset = (type == MINORANT) ? 0 : 1;
+    const int sign = 1 + -2 * offset;
 
     Dip ret_dip(0., -1);
     Dip tmp_dip(1., -1);
