@@ -59,7 +59,7 @@ public:
      *
      * @param min_is_0 if true the dip val will be set to 0. else to 1.
      */
-    Dip(bool min_is_0) : idx(-1) { val = (min_is_0) ? 0. : 1.; };
+    explicit Dip(bool min_is_0) : idx(-1) { val = (min_is_0) ? 0. : 1.; }
 
     /// Methods:
 
