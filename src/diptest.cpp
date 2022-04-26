@@ -72,7 +72,7 @@ void ConvexEnvelope::compute_indices() {
     for (int i = start + offset; offset * (end - i) >= 0; i += offset) {
         indices[i] = i - offset;
 
-        while (1) {
+        while (true) {
             int ind_at_i = indices[i];
             int ind_at_i_iter = indices[ind_at_i];
 
@@ -120,6 +120,10 @@ Dip ConvexEnvelope::compute_dip() {
 }
 
 double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
+#ifndef DDIPTEST_ENABLE_DEBUG
+    UNUSED(debug);
+#endif  // DDIPTEST_ENABLE_DEBUG
+
     assert(gcm.type != lcm.type && gcm.type == MINORANT);
 
     const double* arr = gcm.arr;
@@ -170,7 +174,6 @@ double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
             }
         }
 #endif  /// DIPTEST_DEBUG
-
     } while (gcm.optimum[gcm.y] != lcm.optimum[lcm.y]);
 
     return ret_d;
@@ -370,7 +373,6 @@ double diptst(
         flag = (low == gcm[gcm_obj.x] && high == lcm[lcm_obj.x]);
         low = gcm[gcm_obj.x];
         high = lcm[lcm_obj.x];
-
     } while (!flag);
     /// ------------------------- end of the cycling. -------------------------
 
