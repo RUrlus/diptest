@@ -62,7 +62,7 @@
  */
 #include <diptest/diptest.hpp>
 
-void ConvexEnvelope::compute_indices() {
+inline void ConvexEnvelope::compute_indices() {
     const int offset = (type == MINORANT) ? +1 : -1;
     const int start = (type == MINORANT) ? 1 : size;
     const int end = size + 1 - start;
@@ -92,7 +92,7 @@ void ConvexEnvelope::compute_indices() {
     }
 }
 
-Dip ConvexEnvelope::compute_dip() {
+inline Dip ConvexEnvelope::compute_dip() {
     const int offset = (type == MINORANT) ? 0 : 1;
     const int sign = 1 + -2 * offset;
 
@@ -133,19 +133,10 @@ double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
     do {
         int gcm_y = gcm.optimum[gcm.y], lcm_y = lcm.optimum[lcm.y];
         int is_maj = gcm_y > lcm_y;
-        int i, j, i1, sign;
-
-        if (is_maj) {
-            i = gcm_y;
-            j = lcm_y;
-            i1 = gcm.optimum[gcm.y + 1];
-            sign = 1;
-        } else {
-            j = gcm_y;
-            i = lcm_y;
-            i1 = lcm.optimum[lcm.y - 1];
-            sign = -1;
-        }
+        int i = is_maj * gcm_y + (1-is_maj) * lcm_y;
+        int j = is_maj * lcm_y + (1-is_maj) * gcm_y;
+        int i1 = is_maj * (gcm.optimum[gcm.y + 1]) + (1-is_maj) * (lcm.optimum[lcm.y - 1]); 
+        int sign = 2 * is_maj - 1;
 
         long double dx = sign * ((j - i1 + sign) - ((long double)arr[j] - arr[i1]) * (i - i1) / (arr[i] - arr[i1]));
         gcm.y -= (1 - is_maj);
@@ -202,7 +193,7 @@ double diptst(
 
 #ifndef DIPTEST_DEBUG
     UNUSED(debug);
-#endif
+#endif  // DIPTEST_DEBUG
     long double d = 0.;  // TODO: check if this makes 32/64-bit differences go
     double dip = (min_is_0) ? 0. : 1.;
     Dip dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
@@ -340,7 +331,7 @@ double diptst(
         if (d < dip)
             goto L_END;
 
-            // Calculate the DIPs for the current LOW and HIGH
+        // Calculate the DIPs for the current LOW and HIGH
 #if defined(DIPTEST_DEBUG)
         if (debug)
             cout << "'dip': MAIN-CALCULATION" << endl;
@@ -359,9 +350,9 @@ double diptst(
 
         // Determine the current maximum.
         if (dip_l.val < dip_u.val) {
-            tmp_dip.update(dip_u);
+            tmp_dip = dip_u;
         } else {
-            tmp_dip.update(dip_l);
+            tmp_dip = dip_l;
         }
         if (dip < tmp_dip.val) {
             dip = tmp_dip.val;

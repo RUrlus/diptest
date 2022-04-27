@@ -46,6 +46,7 @@ class Dip {
     // Constructors:
 
     Dip(double val, int idx) : val(val), idx(idx) {}
+
     /**
      * @brief Construct a new Dip object
      *
@@ -56,42 +57,13 @@ class Dip {
     // Methods:
 
     /**
-     * @brief Forces both the `val` and the `idx` to be updated with the given
-     * values
-     *
-     * @param value
-     * @param index
-     */
-    void update(double value, int index) {
-        val = value;
-        idx = index;
-    }
-
-    /**
-     * @brief Forces the two instances to have the same member variables
-     *
-     * @param other a Dip instance whose member parameters will be copied
-     *
-     * @overload
-     */
-    void update(Dip& other) {
-        val = other.val;
-        idx = other.idx;
-    }
-
-    /**
      * @brief An update operation that makes the two instances to have the same
      * member variables if the parameter's dip value is greater the current one
      *
      * @param value the value that the stored value will be compared against
      * @param index the index that the dip value is reported
      */
-    void maybe_update(double value, int index) {
-        if (val < value) {
-            val = value;
-            idx = index;
-        }
-    }
+    void maybe_update(double value, int index);
 
     /**
      * @brief An update operation that makes the two instances to have the same
@@ -101,8 +73,22 @@ class Dip {
      *
      * @overload
      */
-    void maybe_update(Dip& other) { maybe_update(other.val, other.idx); }
+    void maybe_update(const Dip& other);
 };
+
+inline void Dip::maybe_update(double value, int index) {
+    if (val < value) {
+        val = value;
+        idx = index;
+    }
+}
+
+inline void Dip::maybe_update(const Dip& other) {
+    if (val < other.val) {
+        val = other.val;
+        idx = other.idx;
+    }
+}
 
 /**
  * @brief A structure storing the needed parameters for the gcm (or lcm) fit
