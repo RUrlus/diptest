@@ -19,7 +19,7 @@
 #include <stdexcept>  // runtime_error
 
 #include <diptest/pcg64.hpp>
-#include <diptest/dip.hpp>
+#include <diptest/diptest.hpp>
 
 #if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) \
     || defined(__BORLANDC__)
