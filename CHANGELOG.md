@@ -1,5 +1,17 @@
 # Diptest Changelog
 
+## v0.4.1 -- May 2022
+
+### Enhancements
+
+* Add option to set a stream for single threaded p-value bootstrap computation
+
+### Changes 
+
+* diptest.c was rewritten in C++ (Special thanks to [Prodromos Kolyvakis](https://github.com/prokolyvakis))
+* Incorporated OptimizeForArchitecture from VC for better architecture specific
+  compile flags
+
 ## v0.4.0 -- May 2022
 
 ### Changes 
