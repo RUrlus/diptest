@@ -52,7 +52,7 @@ jobs:
     - name: Build wheel
       run: python -m cibuildwheel --output-dir wheelhouse
       env:
-        CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET="10.13" SKBUILD_CONFIGURE_OPTIONS="-DDIPTEST_BUILDING_WHEELS=ON"
+        CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET="10.13" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF"
         CIBW_BUILD: 'cp37-* cp38-* cp39-* cp310-*'
         CIBW_TEST_EXTRAS: test
         CIBW_TEST_COMMAND: python -m pytest {project}/tests/test_diptest.py
