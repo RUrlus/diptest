@@ -76,5 +76,6 @@ if __name__ == '__main__':
         cmake_args=[
             f"-DDIPTEST_VERSION_INFO:STRING={VERSION}",
             f"-Dpybind11_DIR:STRING={pybind11.get_cmake_dir()}",
+            "-DDIPTEST_ENABLE_ARCH_FLAGS:BOOL=ON",
         ]
     )
