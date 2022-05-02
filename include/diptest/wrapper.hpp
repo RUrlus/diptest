@@ -51,7 +51,7 @@ double diptest(const double* x_ptr, int N, int allow_zero = 1, int debug = 0);
 double diptest(const py::array_t<double>& x, int allow_zero, int debug);
 py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug);
 double
-diptest_pval(const double dipstat, const int64_t n, const int64_t n_boot, int allow_zero, int debug, uint64_t seed);
+diptest_pval(const double dipstat, const int64_t n, const int64_t n_boot, int allow_zero, int debug, uint64_t seed, uint64_t stream = 0);
 
 double diptest_pval_mt(
     const double dipstat,

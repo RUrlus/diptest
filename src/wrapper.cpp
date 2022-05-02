@@ -72,11 +72,21 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
 }  // diptest_full
 
 double
-diptest_pval(const double dipstat, const int64_t n, const int64_t n_boot, int allow_zero, int debug, uint64_t seed) {
+diptest_pval(
+    const double dipstat,
+    const int64_t n,
+    const int64_t n_boot,
+    int allow_zero,
+    int debug,
+    uint64_t seed,
+    uint64_t stream
+) {
     pcg64_dxsm rng;
     if (seed == 0) {
         pcg_seed_seq seed_source;
         rng.seed(seed_source);
+    } else if (stream != 0) {
+        rng.seed(seed, stream);
     } else {
         rng.seed(seed);
     }
@@ -115,7 +125,8 @@ double diptest_pval_mt(
     int allow_zero,
     int debug,
     uint64_t seed,
-    size_t n_threads) {
+    size_t n_threads
+) {
 
     std::unique_ptr<bool[]> dips(new bool[n_boot]);
     pcg64_dxsm global_rng;
@@ -185,7 +196,9 @@ void bind_diptest_pval(py::module& m) {
         py::arg("n_boot") = 10000,
         py::arg("allow_zero") = 1,
         py::arg("debug") = 0,
-        py::arg("seed") = 0);
+        py::arg("seed") = 0,
+        py::arg("stream") = 0
+    );
 }
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
