@@ -29,6 +29,7 @@ _ALPHA = np.array((
 ))
 
 _MAX_SAMPLE_SIZE = 72000
+_UINT64_T_MAX = np.iinfo(np.uint64).max
 
 
 def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
@@ -106,7 +107,8 @@ def diptest(
     boot_pval=False,
     n_boot=10000,
     n_threads=None,
-    seed=None
+    seed=None,
+    stream=0,
 ):
     """
     Hartigan & Hartigan's dip test for unimodality.
@@ -141,6 +143,11 @@ def diptest(
     seed : uint, default=None
         seed used for the generation of the uniform samples when computing the
         p-value.
+    stream : uint, default=0
+        stream used by PCG64_DXSM for a given seed. Note that setting the stream
+        is only useful when you want to run multiple simulations based on a
+        single seed. Parameter is ignored unless `boot_pval` is True and `seed`
+        is not zero.
 
     Returns:
     -----------
@@ -177,13 +184,16 @@ def diptest(
             )
             return dip, pval
         elif n_threads > 1 and not _mt_support:
-            warnings.warn("Extension was compiled without parallelisation support (OpenMP was not found), ignoring ``n_threads``")
+            warnings.warn("Extension was compiled without parallelisation support, ignoring ``n_threads``")
+        if stream > _UINT64_T_MAX:
+            raise ValueError("`stream` must fit in a uint64_t.")
         pval = _diptest.diptest_pval(
             dipstat=dip,
             n=n,
             n_boot=n_boot,
             allow_zero=allow_zero,
-            seed=seed or 0
+            seed=seed or 0,
+            stream=stream,
         )
         return dip, pval
 
