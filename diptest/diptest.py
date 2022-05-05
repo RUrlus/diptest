@@ -5,31 +5,13 @@ import multiprocessing
 import numpy as np
 
 from diptest.lib import _diptest
+from diptest.consts import Consts
 
 try:
     from diptest.lib._diptest import diptest_pval_mt
     _mt_support = True
 except ImportError:
     _mt_support = False
-
-
-# [len(N), len(SIG)] table of critical values
-_cdir = os.path.dirname(os.path.realpath(__file__))
-_CRIT_VALS = np.loadtxt(os.path.join(_cdir, 'dip_crit.txt'))
-
-_SAMPLE_SIZE = np.array((
-    4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50, 100,
-    200, 500, 1000, 2000, 5000, 10000, 20000, 40000, 72000
-))
-
-_ALPHA = np.array((
-    0., 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
-    0.95, 0.98, 0.99, 0.995, 0.998, 0.999, 0.9995, 0.9998 , 0.9999,
-    0.99995, 0.99998, 0.99999, 1.
-))
-
-_MAX_SAMPLE_SIZE = 72000
-_UINT64_T_MAX = np.iinfo(np.uint64).max
 
 
 def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
@@ -185,7 +167,7 @@ def diptest(
             return dip, pval
         elif n_threads > 1 and not _mt_support:
             warnings.warn("Extension was compiled without parallelisation support, ignoring ``n_threads``")
-        if stream > _UINT64_T_MAX:
+        if stream > Consts._UINT64_T_MAX:
             raise ValueError("`stream` must fit in a uint64_t.")
         pval = _diptest.diptest_pval(
             dipstat=dip,
@@ -197,7 +179,7 @@ def diptest(
         )
         return dip, pval
 
-    i1 = int(_SAMPLE_SIZE.searchsorted(n, side='left'))
+    i1 = int(Consts._SAMPLE_SIZE.searchsorted(n, side='left'))
     i0 = i1 - 1
 
     # if n falls outside the range of tabulated sample sizes, use the
@@ -207,17 +189,17 @@ def diptest(
     i1 = min(20, i1)
 
     # interpolate on sqrt(n)
-    n0, n1 = _SAMPLE_SIZE[[i0, i1]]
+    n0, n1 = Consts._SAMPLE_SIZE[[i0, i1]]
 
-    y0 = np.sqrt(n0) * _CRIT_VALS[i0]
+    y0 = np.sqrt(n0) * Consts._CRIT_VALS[i0]
     sD = np.sqrt(n) * dip
     if (i0 == i1):
         xp = y0
     else:
         fn = float(n - n0) / (n1 - n0)
-        y1 = np.sqrt(n1) * _CRIT_VALS[i1]
+        y1 = np.sqrt(n1) * Consts._CRIT_VALS[i1]
         xp = y0 + fn * (y1 - y0)
 
-    pval = 1. - np.interp(sD, xp, _ALPHA)
+    pval = 1. - np.interp(sD, xp, Consts._ALPHA)
 
     return dip, float(pval)
