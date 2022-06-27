@@ -1,17 +1,18 @@
-import os
 import warnings
-import multiprocessing
+import psutil
 
 import numpy as np
 
 from diptest.lib import _diptest
 from diptest.consts import Consts
 
-try:
-    from diptest.lib._diptest import diptest_pval_mt
-    _mt_support = True
-except ImportError:
-    _mt_support = False
+_N_CORES = psutil.cpu_count(logical=False)
+_N_CORES_MIN1 = _N_CORES - 1
+
+if _diptest._has_openmp_support:
+    _DEFAULT_N_THREADS = min(_N_CORES_MIN1, 4)
+else:
+    _DEFAULT_N_THREADS = 1
 
 
 def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
@@ -152,10 +153,10 @@ def diptest(
         return dip, 1.0
 
     if boot_pval:
-        n_threads = n_threads or 4
+        n_threads = n_threads or _DEFAULT_N_THREADS
         if n_threads == -1:
-            n_threads = multiprocessing.cpu_count()
-        if n_threads > 1 and _mt_support:
+            n_threads = _N_CORES
+        if n_threads > 1 and _diptest._has_openmp_support:
             pval = _diptest.diptest_pval_mt(
                 dipstat=dip,
                 n=n,
@@ -165,7 +166,7 @@ def diptest(
                 n_threads=n_threads
             )
             return dip, pval
-        elif n_threads > 1 and not _mt_support:
+        elif n_threads > 1 and not _diptest._has_openmp_support:
             warnings.warn("Extension was compiled without parallelisation support, ignoring ``n_threads``")
         if stream > Consts._UINT64_T_MAX:
             raise ValueError("`stream` must fit in a uint64_t.")
