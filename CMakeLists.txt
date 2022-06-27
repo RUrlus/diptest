@@ -58,7 +58,6 @@ ADD_DEFINITIONS(-DEXTENSION_MODULE_NAME=${MODNAME})
 
 pybind11_add_module(${MODNAME}
     MODULE
-        ${PROJECT_SOURCE_DIR}/src/diptest.cpp
         ${PROJECT_SOURCE_DIR}/src/bindings.cpp
         ${PROJECT_SOURCE_DIR}/src/wrapper.cpp
         ${PROJECT_SOURCE_DIR}/src/test_pcg.cpp
