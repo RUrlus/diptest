@@ -1,5 +1,15 @@
 # Diptest Changelog
 
+## v0.5.0 -- June 2022
+
+### Changes
+
+* Disable input checks for internal calls to diptst. (Suggested by [Prodromos Kolyvakis](https://github.com/prokolyvakis))
+
+### Enhancements
+
+* Set `_has_open_mp_support` attribute to the extension for neater support checks
+
 ## v0.4.2 -- May 2022
 
 ### Fixes

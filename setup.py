@@ -21,8 +21,8 @@ from skbuild import setup
 NAME = 'diptest'
 
 MAJOR = 0
-REVISION = 4
-PATCH = 2
+REVISION = 5
+PATCH = 0
 DEV = False
 
 # note: also update README.rst
