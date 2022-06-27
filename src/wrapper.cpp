@@ -1,7 +1,6 @@
 /* wrapper.cpp -- implementation of wrapper around diptst from diptest.c
  * Copyright 2022 R. Urlus
  */
-
 #include <diptest/wrapper.hpp>
 
 namespace py = pybind11;
@@ -10,21 +9,14 @@ namespace diptest {
 
 namespace details {
 
-double diptest(const double* x_ptr, int N, int allow_zero, int debug) {
-    int ifault = 0;
-    int lo_hi[4] = {0, 0, 0, 0};
+inline double diptest(const double* x_ptr, int N, int allow_zero, int debug) {
+    std::array<int, 4> lo_hi = {0, 0, 0, 0};
     std::unique_ptr<int[]> gcm(new int[N]);
     std::unique_ptr<int[]> lcm(new int[N]);
     std::unique_ptr<int[]> mn(new int[N]);
     std::unique_ptr<int[]> mj(new int[N]);
 
-    double dip = diptst(x_ptr, N, &lo_hi[0], &ifault, gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
-
-    if (ifault == 1) {
-        throw std::runtime_error("N must be >= 1.");
-    } else if (ifault == 2) {
-        throw std::runtime_error("x must be sorted in ascending error.");
-    }
+    double dip = diptst<true>(x_ptr, N, lo_hi.data(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
     return dip;
 }  // diptest
 
@@ -37,8 +29,7 @@ double diptest(const py::array_t<double>& x, int allow_zero, int debug) {
 py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
     const double* x_ptr = x.data();
     int N = x.size();
-    int ifault = 0;
-    int lo_hi[4] = {0, 0, 0, 0};
+    std::array<int, 4> lo_hi = {0, 0, 0, 0};
 
     auto gcm = py::array_t<int>(N);
     auto lcm = py::array_t<int>(N);
@@ -50,13 +41,7 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
     int* mn_ptr = mn.get();
     int* mj_ptr = mj.get();
 
-    double dip = diptst(x_ptr, N, &lo_hi[0], &ifault, gcm_ptr, lcm_ptr, mn_ptr, mj_ptr, allow_zero, debug);
-
-    if (ifault == 1) {
-        throw std::runtime_error("N must be >= 1.");
-    } else if (ifault == 2) {
-        throw std::runtime_error("x must be sorted in ascending error.");
-    }
+    double dip = diptst<true>(x_ptr, N, lo_hi.data(), gcm_ptr, lcm_ptr, mn_ptr, mj_ptr, allow_zero, debug);
 
     using namespace pybind11::literals;  // to bring in the `_a` literal NOLINT
     return py::dict(
@@ -93,8 +78,7 @@ diptest_pval(
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
     double dip;
-    int ifault = 0;
-    int lo_hi[4] = {0, 0, 0, 0};
+    std::array<int, 4> lo_hi = {0, 0, 0, 0};
     std::unique_ptr<int[]> gcm(new int[n]);
     std::unique_ptr<int[]> lcm(new int[n]);
     std::unique_ptr<int[]> mn(new int[n]);
@@ -110,7 +94,7 @@ diptest_pval(
             r_sample[j] = dist(rng);
         }
         std::sort(r_sample, sample_end);
-        dip = diptst(r_sample, n, &lo_hi[0], &ifault, gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
+        dip = diptst<false>(r_sample, n, lo_hi.data(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
         dips[i] = dipstat <= dip;
     }
     int64_t accu = 0;
@@ -140,7 +124,6 @@ double diptest_pval_mt(
 
 #pragma omp parallel num_threads(n_threads) shared(dips, global_rng)
     {
-        int ifault = 0;
         std::unique_ptr<int[]> lo_hi(new int[n]);
         std::memset(lo_hi.get(), 0, 4);
         std::unique_ptr<int[]> gcm(new int[n]);
@@ -168,8 +151,8 @@ double diptest_pval_mt(
             }
             // sort the allocated block for this bootstrap sample
             std::sort(p_sample, p_sample_end);
-            dips[i] = dipstat <= diptst(
-                p_sample, n, lo_hi.get(), &ifault, gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug
+            dips[i] = dipstat <= diptst<false>(
+                p_sample, n, lo_hi.get(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug
             );
         }
     }  // pragma parallel
