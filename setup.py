@@ -72,7 +72,6 @@ if __name__ == '__main__':
     setup(
         name=NAME,
         packages=find_packages(),
-        package_data={'diptest': ['dip_crit.txt']},
         version=FULL_VERSION,
         cmake_args=[
             f"-DDIPTEST_VERSION_INFO:STRING={VERSION}",
