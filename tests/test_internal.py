@@ -1,20 +1,18 @@
-import os
-import warnings
-import pytest
 import numpy as np
 import multiprocessing
 
-import diptest as dt
-from diptest.diptest import _mt_support
+import diptest
 
 try:
     from diptest.lib._diptest import pcg_seed_test
     from diptest.lib._diptest import pcg_set_stream_test
-    if _mt_support:
+    from diptest.lib._diptest import _has_openmp_support
+    if _has_openmp_support:
         from diptest.lib._diptest import pcg_mt_stream_test
     _has_support = True
 except ImportError:
     _has_support = False
+    _has_openmp_support = False
 
 CORE_CNT = multiprocessing.cpu_count() - 1
 
@@ -59,7 +57,7 @@ if _has_support:
         assert not np.isclose(s0, s1).all()
         assert not np.isclose(s1, s2).all()
 
-    if _mt_support and CORE_CNT > 1:
+    if _has_openmp_support and CORE_CNT > 1:
         def test_pcg_mt_seed_stream():
             N = 100000
             SEED = 42

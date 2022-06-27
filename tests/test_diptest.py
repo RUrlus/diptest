@@ -5,7 +5,7 @@ import numpy as np
 import multiprocessing
 
 import diptest as dt
-from diptest.diptest import _mt_support
+from diptest.lib._diptest import _has_openmp_support
 
 _cdir = os.path.dirname(os.path.realpath(__file__))
 _TEST_SAMPLE = np.load(os.path.join(_cdir, 'test_sample.npy'))
@@ -210,10 +210,10 @@ def test_diptest_bootstrap():
     assert np.isclose(pv, _TEST_SAMPLE_PVAL, rtol=5e-4)
 
 
-if _mt_support:
+if _has_openmp_support:
     def test_diptest_bootstrap_mt():
-        cores = multiprocessing.cpu_count()
-        if _mt_support and cores > 1:
+        cores = multiprocessing.cpu_count() - 1
+        if _has_openmp_support and cores > 1:
             dip, pv = dt.diptest(
                 _TEST_SAMPLE,
                 boot_pval=True,
