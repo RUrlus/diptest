@@ -33,6 +33,12 @@ PYBIND11_MODULE(EXTENSION_MODULE_NAME, m) {
     m.attr("__version__") = "dev";
 #endif
 #endif
+
+#ifdef MMU_HAS_OPENMP_SUPPORT
+    m.attr("_has_openmp_support") = true;
+#else
+    m.attr("_has_openmp_support") = false;
+#endif  // MMU_HAS_OPENMP_SUPPORT
 }
 
 }  // namespace bindings
