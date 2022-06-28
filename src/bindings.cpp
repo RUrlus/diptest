@@ -34,7 +34,7 @@ PYBIND11_MODULE(EXTENSION_MODULE_NAME, m) {
 #endif
 #endif
 
-#ifdef MMU_HAS_OPENMP_SUPPORT
+#ifdef DIPTEST_HAS_OPENMP_SUPPORT
     m.attr("_has_openmp_support") = true;
 #else
     m.attr("_has_openmp_support") = false;
