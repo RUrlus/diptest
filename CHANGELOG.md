@@ -1,5 +1,11 @@
 # Diptest Changelog
 
+## v0.5.1 -- June 2022
+
+### Fix
+
+* Fix typo in OPENMP support macro
+
 ## v0.5.0 -- June 2022
 
 ### Changes

@@ -22,10 +22,8 @@ NAME = 'diptest'
 
 MAJOR = 0
 REVISION = 5
-PATCH = 0
+PATCH = 1
 DEV = False
-
-# note: also update README.rst
 
 VERSION = '{major}.{revision}.{patch}'.format(major=MAJOR, revision=REVISION, patch=PATCH)
 FULL_VERSION = VERSION
