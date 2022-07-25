@@ -56,16 +56,14 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
         "_lh_3"_a = lo_hi[3]);
 }  // diptest_full
 
-double
-diptest_pval(
+double diptest_pval(
     const double dipstat,
     const int64_t n,
     const int64_t n_boot,
     int allow_zero,
     int debug,
     uint64_t seed,
-    uint64_t stream
-) {
+    uint64_t stream) {
     pcg64_dxsm rng;
     if (seed == 0) {
         pcg_seed_seq seed_source;
@@ -110,9 +108,7 @@ double diptest_pval_mt(
     int allow_zero,
     int debug,
     uint64_t seed,
-    size_t n_threads
-) {
-
+    size_t n_threads) {
     std::unique_ptr<bool[]> dips(new bool[n_boot]);
     pcg64_dxsm global_rng;
     if (seed == 0) {
@@ -142,18 +138,16 @@ double diptest_pval_mt(
         rng.set_stream(omp_get_thread_num() + 1);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-
 #pragma omp for
         for (int64_t i = 0; i < n_boot; i++) {
             // refill the sample array with fresh draws
             for (int64_t j = 0; j < n; j++) {
-                sample[j] = dist(rng);
+                p_sample[j] = dist(rng);
             }
             // sort the allocated block for this bootstrap sample
             std::sort(p_sample, p_sample_end);
             dips[i] = dipstat <= diptst<false>(
-                p_sample, n, lo_hi.get(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug
-            );
+                          p_sample, n, lo_hi.get(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
         }
     }  // pragma parallel
     int64_t accu = 0;
@@ -182,8 +176,7 @@ void bind_diptest_pval(py::module& m) {
         py::arg("allow_zero") = 1,
         py::arg("debug") = 0,
         py::arg("seed") = 0,
-        py::arg("stream") = 0
-    );
+        py::arg("stream") = 0);
 }
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)

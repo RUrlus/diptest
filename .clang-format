@@ -12,7 +12,7 @@ BinPackArguments: 'false'
 BinPackParameters: 'false'
 BreakBeforeBinaryOperators: All
 BreakInheritanceList: BeforeComma
-ColumnLimit: '120'
+ColumnLimit: '80'
 CompactNamespaces: 'false'
 FixNamespaceComments: 'true'
 IndentWidth: 4
