@@ -28,8 +28,9 @@ py::array_t<double> pcg_seed_test(const size_t size, const uint64_t seed) {
 }
 
 py::array_t<double> pcg_set_stream_test(
-    const size_t size, const uint64_t seed, const py::array_t<uint64_t>& streams
-) {
+    const size_t size,
+    const uint64_t seed,
+    const py::array_t<uint64_t>& streams) {
     const size_t n_streams = streams.size();
     // allocate the return array
     py::array_t<double> arr(size * n_streams);
@@ -59,8 +60,7 @@ py::array_t<double> pcg_set_stream_test(
 py::array_t<double> pcg_mt_stream_test(
     const size_t row_size,
     const uint64_t seed,
-    const int n_threads
-) {
+    const int n_threads) {
     pcg64_dxsm global_rng;
     if (seed == 0) {
         pcg_seed_seq seed_source;
@@ -75,20 +75,20 @@ py::array_t<double> pcg_mt_stream_test(
 
 #pragma omp parallel num_threads(n_threads) shared(ptr, global_rng)
     {
-    pcg64_dxsm rng = global_rng;
-    rng.set_stream(omp_get_thread_num() + 1);
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
+        pcg64_dxsm rng = global_rng;
+        rng.set_stream(omp_get_thread_num() + 1);
+        std::uniform_real_distribution<double> dist(0.0, 1.0);
 
 #pragma omp for
-    for (size_t i = 0; i < total_size; i++) {
-        ptr[i] = dist(rng);
-    }
+        for (size_t i = 0; i < total_size; i++) {
+            ptr[i] = dist(rng);
+        }
     }  // pragma parallel
     return arr.reshape({static_cast<size_t>(n_threads), row_size});
 }
-#endif // DIPTEST_HAS_OPENMP_SUPPORT
+#endif  // DIPTEST_HAS_OPENMP_SUPPORT
 
-} // namespace tests
+}  // namespace tests
 
 namespace bindings {
 
@@ -97,8 +97,7 @@ void bind_pcg_seed_test(py::module& m) {
         "pcg_seed_test",
         &diptest::tests::pcg_seed_test,
         py::arg("size"),
-        py::arg("seed")
-    );
+        py::arg("seed"));
 }
 
 void bind_pcg_set_stream_test(py::module& m) {
@@ -107,8 +106,7 @@ void bind_pcg_set_stream_test(py::module& m) {
         &diptest::tests::pcg_set_stream_test,
         py::arg("size"),
         py::arg("seed"),
-        py::arg("streams")
-    );
+        py::arg("streams"));
 }
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
@@ -118,8 +116,7 @@ void bind_pcg_mt_stream_test(py::module& m) {
         &diptest::tests::pcg_mt_stream_test,
         py::arg("row_size"),
         py::arg("seed"),
-        py::arg("n_threads")
-    );
+        py::arg("n_threads"));
 }
 #endif
 

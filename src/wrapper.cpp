@@ -16,7 +16,16 @@ inline double diptest(const double* x_ptr, int N, int allow_zero, int debug) {
     std::unique_ptr<int[]> mn(new int[N]);
     std::unique_ptr<int[]> mj(new int[N]);
 
-    double dip = diptst<true>(x_ptr, N, lo_hi.data(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
+    double dip = diptst<true>(
+        x_ptr,
+        N,
+        lo_hi.data(),
+        gcm.get(),
+        lcm.get(),
+        mn.get(),
+        mj.get(),
+        allow_zero,
+        debug);
     return dip;
 }  // diptest
 
@@ -41,7 +50,16 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
     int* mn_ptr = mn.get();
     int* mj_ptr = mj.get();
 
-    double dip = diptst<true>(x_ptr, N, lo_hi.data(), gcm_ptr, lcm_ptr, mn_ptr, mj_ptr, allow_zero, debug);
+    double dip = diptst<true>(
+        x_ptr,
+        N,
+        lo_hi.data(),
+        gcm_ptr,
+        lcm_ptr,
+        mn_ptr,
+        mj_ptr,
+        allow_zero,
+        debug);
 
     using namespace pybind11::literals;  // to bring in the `_a` literal NOLINT
     return py::dict(
@@ -92,11 +110,22 @@ double diptest_pval(
             r_sample[j] = dist(rng);
         }
         std::sort(r_sample, sample_end);
-        dip = diptst<false>(r_sample, n, lo_hi.data(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
+        dip = diptst<false>(
+            r_sample,
+            n,
+            lo_hi.data(),
+            gcm.get(),
+            lcm.get(),
+            mn.get(),
+            mj.get(),
+            allow_zero,
+            debug);
         dips[i] = dipstat <= dip;
     }
     int64_t accu = 0;
-    double p_val = static_cast<double>(std::accumulate(dips.get(), dips.get() + n_boot, accu)) / n_boot;
+    double p_val = static_cast<double>(
+                       std::accumulate(dips.get(), dips.get() + n_boot, accu))
+                   / n_boot;
     return p_val;
 }  // diptest_pval
 
@@ -131,9 +160,10 @@ double diptest_pval_mt(
         double* p_sample = sample.get();
         double* p_sample_end = p_sample + n;
 
-        // PCG family has different streams which are, in theory, independent of each other.
-        // Hence, we can use the same seed and a different stream to draw independent samples
-        // from each thread without having to allocate the whole block
+        // PCG family has different streams which are, in theory, independent of
+        // each other. Hence, we can use the same seed and a different stream to
+        // draw independent samples from each thread without having to allocate
+        // the whole block
         pcg64_dxsm rng = global_rng;
         rng.set_stream(omp_get_thread_num() + 1);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -147,11 +177,21 @@ double diptest_pval_mt(
             // sort the allocated block for this bootstrap sample
             std::sort(p_sample, p_sample_end);
             dips[i] = dipstat <= diptst<false>(
-                          p_sample, n, lo_hi.get(), gcm.get(), lcm.get(), mn.get(), mj.get(), allow_zero, debug);
+                          p_sample,
+                          n,
+                          lo_hi.get(),
+                          gcm.get(),
+                          lcm.get(),
+                          mn.get(),
+                          mj.get(),
+                          allow_zero,
+                          debug);
         }
     }  // pragma parallel
     int64_t accu = 0;
-    double p_val = static_cast<double>(std::accumulate(dips.get(), dips.get() + n_boot, accu)) / n_boot;
+    double p_val = static_cast<double>(
+                       std::accumulate(dips.get(), dips.get() + n_boot, accu))
+                   / n_boot;
     return p_val;
 }  // diptest_pval_mt
 #endif
@@ -159,11 +199,21 @@ double diptest_pval_mt(
 namespace bindings {
 
 void bind_diptest(py::module& m) {
-    m.def("diptest", &diptest::diptest, py::arg("x"), py::arg("allow_zero") = 1, py::arg("debug") = 0);
+    m.def(
+        "diptest",
+        &diptest::diptest,
+        py::arg("x"),
+        py::arg("allow_zero") = 1,
+        py::arg("debug") = 0);
 }
 
 void bind_diptest_full(py::module& m) {
-    m.def("diptest_full", &diptest::diptest_full, py::arg("x"), py::arg("allow_zero") = 1, py::arg("debug") = 0);
+    m.def(
+        "diptest_full",
+        &diptest::diptest_full,
+        py::arg("x"),
+        py::arg("allow_zero") = 1,
+        py::arg("debug") = 0);
 }
 
 void bind_diptest_pval(py::module& m) {

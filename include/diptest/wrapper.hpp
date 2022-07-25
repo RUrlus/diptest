@@ -18,11 +18,11 @@
 #include <random>     // uniform_real_distribution
 #include <stdexcept>  // runtime_error
 
-#include <diptest/pcg64.hpp>
 #include <diptest/diptest.hpp>
+#include <diptest/pcg64.hpp>
 
-#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__) \
-    || defined(__BORLANDC__)
+#if defined(_WIN32) || defined(_WIN64) || defined(WIN32) \
+    || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__BORLANDC__)
 #define OS_WIN
 #endif
 
@@ -35,7 +35,8 @@
 // Fix for lack of ssize_t on Windows for CPython3.10
 #if defined(_MSC_VER)
 #pragma warning(push)
-#pragma warning(disable : 4127)  // warning C4127: Conditional expression is constant
+#pragma warning( \
+    disable : 4127)  // warning C4127: Conditional expression is constant
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 #endif
@@ -50,8 +51,14 @@ double diptest(const double* x_ptr, int N, int allow_zero = 1, int debug = 0);
 
 double diptest(const py::array_t<double>& x, int allow_zero, int debug);
 py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug);
-double
-diptest_pval(const double dipstat, const int64_t n, const int64_t n_boot, int allow_zero, int debug, uint64_t seed, uint64_t stream = 0);
+double diptest_pval(
+    const double dipstat,
+    const int64_t n,
+    const int64_t n_boot,
+    int allow_zero,
+    int debug,
+    uint64_t seed,
+    uint64_t stream = 0);
 
 double diptest_pval_mt(
     const double dipstat,

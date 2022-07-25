@@ -82,7 +82,8 @@
 enum ConvexEnvelopeType { MAJORANT, MINORANT };
 
 /**
- * @brief Storage of the dip value and the index at which the value was reported.
+ * @brief Storage of the dip value and the index at which the value was
+ * reported.
  *
  * The class, for the ease of speed, does not perform any consistency checks,
  * such as enforcing val and idx to be non-negative.
@@ -91,7 +92,7 @@ enum ConvexEnvelopeType { MAJORANT, MINORANT };
  * @param idx the index at which the dip value is reported
  */
 class Dip {
- public:
+   public:
     double val;
     int idx;
 
@@ -155,7 +156,7 @@ inline void Dip::maybe_update(const Dip& other) {
  * @param type the type of the fit, i.e., either gcm or lcm fit
  */
 class ConvexEnvelope {
- public:
+   public:
     const double* arr;
     int *optimum, *indices;
     const int size;
@@ -164,8 +165,17 @@ class ConvexEnvelope {
 
     // Constructors:
 
-    ConvexEnvelope(const double* arr, int* optimum, int* indices, int size, ConvexEnvelopeType type)
-        : arr(arr), optimum(optimum), indices(indices), size(size), type(type) {}
+    ConvexEnvelope(
+        const double* arr,
+        int* optimum,
+        int* indices,
+        int size,
+        ConvexEnvelopeType type)
+        : arr(arr),
+          optimum(optimum),
+          indices(indices),
+          size(size),
+          type(type) {}
 
     // Methods:
 
@@ -200,13 +210,13 @@ inline void ConvexEnvelope::compute_indices() {
             int ind_at_i_iter = indices[ind_at_i];
 
             /**
-             * We compare the rate of change of arr, i.e., (arr[x]-arr[y])/(x-y),
-             * at the indices:
-             *      a. (i, ind_at_i)
-             *      b. (ind_at_i, ind_at_i_iter)
+             * We compare the rate of change of arr, i.e.,
+             * (arr[x]-arr[y])/(x-y), at the indices: a. (i, ind_at_i) b.
+             * (ind_at_i, ind_at_i_iter)
              */
-            bool rate_change_flag = (arr[i] - arr[ind_at_i]) * (ind_at_i - ind_at_i_iter)
-                                    < (arr[ind_at_i] - arr[ind_at_i_iter]) * (i - ind_at_i);
+            bool rate_change_flag
+                = (arr[i] - arr[ind_at_i]) * (ind_at_i - ind_at_i_iter)
+                  < (arr[ind_at_i] - arr[ind_at_i_iter]) * (i - ind_at_i);
 
             if (ind_at_i == start || rate_change_flag)
                 break;
@@ -229,7 +239,9 @@ inline Dip ConvexEnvelope::compute_dip() {
             double C = (j_end - j_start) / (arr[j_end] - arr[j_start]);
 
             for (int jj = j_start; jj <= j_end; ++jj) {
-                double d = sign * ((jj - j_start + sign) - (arr[jj] - arr[j_start]) * C);
+                double d
+                    = sign
+                      * ((jj - j_start + sign) - (arr[jj] - arr[j_start]) * C);
 
                 tmp_dip.maybe_update(d, jj);
             }
@@ -252,7 +264,8 @@ inline Dip ConvexEnvelope::compute_dip() {
  * `DDIPTEST_ENABLE_DEBUG=ON`
  * @return the maximum distance
  */
-inline double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
+inline double
+max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
 #ifndef DDIPTEST_ENABLE_DEBUG
     UNUSED(debug);
 #endif  // DDIPTEST_ENABLE_DEBUG
@@ -265,12 +278,16 @@ inline double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) 
     do {
         int gcm_y = gcm.optimum[gcm.y], lcm_y = lcm.optimum[lcm.y];
         int is_maj = gcm_y > lcm_y;
-        int i = is_maj * gcm_y + (1-is_maj) * lcm_y;
-        int j = is_maj * lcm_y + (1-is_maj) * gcm_y;
-        int i1 = is_maj * (gcm.optimum[gcm.y + 1]) + (1-is_maj) * (lcm.optimum[lcm.y - 1]);
+        int i = is_maj * gcm_y + (1 - is_maj) * lcm_y;
+        int j = is_maj * lcm_y + (1 - is_maj) * gcm_y;
+        int i1 = is_maj * (gcm.optimum[gcm.y + 1])
+                 + (1 - is_maj) * (lcm.optimum[lcm.y - 1]);
         int sign = 2 * is_maj - 1;
 
-        long double dx = sign * ((j - i1 + sign) - ((long double)arr[j] - arr[i1]) * (i - i1) / (arr[i] - arr[i1]));
+        long double dx = sign
+                         * ((j - i1 + sign)
+                            - ((long double)arr[j] - arr[i1]) * (i - i1)
+                                  / (arr[i] - arr[i1]));
         gcm.y -= (1 - is_maj);
         lcm.y += is_maj;
 
@@ -280,7 +297,8 @@ inline double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) 
             lcm.x = lcm.y - is_maj;
 #if defined(DIPTEST_DEBUG)
             if (debug >= 2) {
-                cout << ((is_maj) ? "G" : "L") << "(" << (gcm.x) << ", " << (lcm.x) << ")";
+                cout << ((is_maj) ? "G" : "L") << "(" << (gcm.x) << ", "
+                     << (lcm.x) << ")";
             }
 #endif  // DIPTEST_DEBUG
         }
@@ -292,7 +310,8 @@ inline double max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) 
 #if defined(DIPTEST_DEBUG)
         if (debug) {
             if (debug >= 2) {
-                cout << " --> (gcm.y, lcm.y) = (" << (gcm.y) << ", " << (lcm.y) << ")" << endl;
+                cout << " --> (gcm.y, lcm.y) = (" << (gcm.y) << ", " << (lcm.y)
+                     << ")" << endl;
             } else {
                 cout << ".";
             }
@@ -345,7 +364,7 @@ double diptst(
 
 #ifndef DIPTEST_DEBUG
     UNUSED(debug);
-#endif  // DIPTEST_DEBUG
+#endif                   // DIPTEST_DEBUG
     long double d = 0.;  // TODO: check if this makes 32/64-bit differences go
     double dip = (min_is_0) ? 0. : 1.;
     Dip dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
@@ -429,7 +448,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
         if (debug) {
-            cout << "'dip': LOOP-BEGIN: 2n*D = " << dip << " and [low, high] = [" << setw(3) << low << ", " << setw(3)
+            cout << "'dip': LOOP-BEGIN: 2n*D = " << dip
+                 << " and [low, high] = [" << setw(3) << low << ", " << setw(3)
                  << high << "]";
             if (debug >= 3) {
                 // Print the GCM:
@@ -443,7 +463,8 @@ double diptst(
                     cout << lcm[i] << ", ";
                 cout << lcm[l_lcm] << endl;
             } else {  // debug <= 2
-                cout << "; (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", " << setw(2) << l_gcm << ")" << endl;
+                cout << "; (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", "
+                     << setw(2) << l_gcm << ")" << endl;
             }
         }
 #endif  // DIPTEST_DEBUG
@@ -475,15 +496,16 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
             if (debug)
-                cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", " << setw(2) << l_gcm
-                     << ") ==> d := " << d << endl;
+                cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = (" << setw(2)
+                     << l_lcm << ", " << setw(2) << l_gcm << ") ==> d := " << d
+                     << endl;
 #endif  // DIPTEST_DEBUG
         }
 
         if (d < dip)
             goto L_END;
 
-        // Calculate the DIPs for the current LOW and HIGH
+            // Calculate the DIPs for the current LOW and HIGH
 #if defined(DIPTEST_DEBUG)
         if (debug)
             cout << "'dip': MAIN-CALCULATION" << endl;
@@ -497,7 +519,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
         if (debug)
-            cout << " (dip_l, dip_u) = (" << dip_l.val << ", " << dip_u.val << ")";
+            cout << " (dip_l, dip_u) = (" << dip_l.val << ", " << dip_u.val
+                 << ")";
 #endif  // DIPTEST_DEBUG
 
         // Determine the current maximum.
@@ -510,7 +533,8 @@ double diptst(
             dip = tmp_dip.val;
 #if defined(DIPTEST_DEBUG)
             if (debug)
-                cout << " --> new larger dip " << (tmp_dip.val) << " ( at index := " << (tmp_dip.idx) << " )" << endl;
+                cout << " --> new larger dip " << (tmp_dip.val)
+                     << " ( at index := " << (tmp_dip.idx) << " )" << endl;
 #endif  // DIPTEST_DEBUG
         }
 
@@ -522,7 +546,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
     if (debug)
-        cout << "'dip': LOOP-END: No improvement found neither in low := " << low << " nor in high := " << high << endl;
+        cout << "'dip': LOOP-END: No improvement found neither in low := "
+             << low << " nor in high := " << high << endl;
 #endif  // DIPTEST_DEBUG
 
 L_END:
