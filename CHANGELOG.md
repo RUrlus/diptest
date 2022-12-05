@@ -1,5 +1,11 @@
 # Diptest Changelog
 
+## v0.5.2 -- December 2022
+
+### Enhancements
+
+* Added support for Python 3.11
+
 ## v0.5.1 -- June 2022
 
 ### Fix
