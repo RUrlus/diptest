@@ -33,10 +33,10 @@ diptest can be installed from PyPi using:
 
 Wheels containing the pre-compiled extension are available for:
 
-- Windows x84-64 - CPython 3.7 - 3.10
-- Linux x84-64 - CPython 3.7 - 3.10
-- MacOS x84-64 - CPython 3.7 - 3.10
-- MacOS ARM-64 - CPython 3.8 - 3.10
+- Windows x84-64 - CPython 3.7 - 3.11
+- Linux x84-64 - CPython 3.7 - 3.11
+- MacOS x84-64 - CPython 3.7 - 3.11
+- MacOS ARM-64 - CPython 3.8 - 3.11
 
 If you have a C/C++ compiler available it is advised to install without
 the wheel as this enables architecture specific optimisations.
