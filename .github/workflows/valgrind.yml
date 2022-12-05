@@ -30,8 +30,6 @@ jobs:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -53,7 +51,6 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python -m pip install --upgrade pybind11 cmake ninja pytest
 
-          
       - name: Configure
         run: |
           cmake -S . -G Ninja -B build \

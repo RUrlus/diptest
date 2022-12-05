@@ -30,8 +30,6 @@ jobs:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -46,7 +44,7 @@ jobs:
       - name: Install dependencies on ubuntu
         run: |
           sudo apt-get update
-          sudo apt-get install -y valgrind
+          sudo apt-get install -y valgrind libomp-dev
 
       - name: Install python packages
         run: |
@@ -61,8 +59,8 @@ jobs:
               -DDIPTEST_ENABLE_DEBUG=OFF \
               -DDIPTEST_ENABLE_OPENMP=ON \
               -Dpybind11_DIR=$(python3 -c 'import pybind11; print(pybind11.get_cmake_dir())') \
-              -DCMAKE_C_COMPILER=clang-11 \
-              -DCMAKE_CXX_COMPILER=clang++-11 \
+              -DCMAKE_C_COMPILER=clang-14 \
+              -DCMAKE_CXX_COMPILER=clang++-14 \
               -DCMAKE_INSTALL_PREFIX:PATH=. \
               -DCMAKE_BUILD_TYPE=Asan \
               -DLDFLAGS=-shared-libasan

@@ -36,13 +36,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         config: 
         - {
-            name: "Ubuntu (GCC-10)",
+            name: "Ubuntu (GCC-11)",
             build_type: "Release",
-            cc: "gcc-10",
-            cxx: "g++-10",
+            cc: "gcc-11",
+            cxx: "g++-11",
             generators: "Ninja",
             target: "all"
           }
