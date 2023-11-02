@@ -14,28 +14,31 @@ LICENSE.
 """
 
 import os
+
 import pybind11
 from setuptools import find_packages
 from skbuild import setup
 
-NAME = 'diptest'
+NAME = "diptest"
 
 MAJOR = 0
-REVISION = 5
-PATCH = 2
+REVISION = 6
+PATCH = 0
 DEV = False
 
-VERSION = '{major}.{revision}.{patch}'.format(major=MAJOR, revision=REVISION, patch=PATCH)
+VERSION = "{major}.{revision}.{patch}".format(
+    major=MAJOR, revision=REVISION, patch=PATCH
+)
 FULL_VERSION = VERSION
 if DEV:
-    FULL_VERSION += '.dev'
+    FULL_VERSION += ".dev"
 
 # read the contents of readme file
 with open("README.md", encoding="utf-8") as f:
     long_description = f.read()
 
 
-def write_version_py(filename: str = 'diptest/version.py') -> None:
+def write_version_py(filename: str = "diptest/version.py") -> None:
     """Write package version to version.py.
 
     This will ensure that the version in version.py is in sync with us.
@@ -55,17 +58,23 @@ full_version = '{full_version!s}'
 release = {is_release!s}
 """
 
-    with open(filename, 'w') as version_file:
+    with open(filename, "w") as version_file:
         version_file.write(
-            version_str.format(name=NAME.lower(), version=VERSION, full_version=FULL_VERSION, is_release=not DEV)
+            version_str.format(
+                name=NAME.lower(),
+                version=VERSION,
+                full_version=FULL_VERSION,
+                is_release=not DEV,
+            )
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     write_version_py()
-    if 'DIPTEST_MANUAL_BUILD' in os.environ:
+    if "DIPTEST_MANUAL_BUILD" in os.environ:
         from setuptools import setup
-        print('Diptest: running pip install without extension')
+
+        print("Diptest: running pip install without extension")
 
     setup(
         name=NAME,
@@ -75,5 +84,5 @@ if __name__ == '__main__':
             f"-DDIPTEST_VERSION_INFO:STRING={VERSION}",
             f"-Dpybind11_DIR:STRING={pybind11.get_cmake_dir()}",
             "-DDIPTEST_ENABLE_ARCH_FLAGS:BOOL=ON",
-        ]
+        ],
     )
