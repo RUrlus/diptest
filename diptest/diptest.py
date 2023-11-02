@@ -70,7 +70,7 @@ def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
             (x.shape[1] == 1) or (x.shape[0]== 1)
         )
     ):
-        raise TypeError("x should be one-dimensional")
+        raise TypeError('x should be one-dimensional')
 
     if full_output:
         res = _diptest.diptest_full(x, allow_zero, debug)
@@ -85,6 +85,7 @@ def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
 
 def diptest(
     x,
+    full_output=False,
     sort_x=True,
     allow_zero=True,
     boot_pval=False,
@@ -105,6 +106,8 @@ def diptest(
     ----------
     x : np.ndarray
         the input samples
+    full_output : boolean, default=False
+        return dict alongside statistic, see below for details
     sort_x : bool, default=True
         if False x is assumed to already be sorted in ascending order
     allow_zero : boolean, default=True
@@ -138,6 +141,15 @@ def diptest(
         the dip statistic
     pval : double
         the p-value for the test
+    res : dict, optional
+        returned if full_output == True.
+        Contains the following fields:
+            lo:     indices of lower end of modal interval
+            hi:     indices of upper end of modal interval
+            xl:     lower end of modal interval
+            xu:     upper end of modal interval
+            gcm:    (last-used) indices of the greatest concave majorant
+            lcm:    (last-used) indices of the least concave majorant
 
     Reference:
     -----------
@@ -146,61 +158,49 @@ def diptest(
 
     """
     n = x.size
-    dip = dipstat(x, allow_zero=allow_zero, sort_x=sort_x)
+    r = dipstat(x, full_output=full_output, allow_zero=allow_zero, sort_x=sort_x)
+    dip = r if not full_output else r[0]
 
     if n <= 3:
         warnings.warn('Dip test is not valid for n <= 3')
-        return dip, 1.0
+        return (dip, 1.0) if not full_output else (dip, 1.0, r[1])
 
     if boot_pval:
         n_threads = n_threads or _DEFAULT_N_THREADS
         if n_threads == -1:
             n_threads = _N_CORES
-        if n_threads > 1 and _diptest._has_openmp_support:
-            pval = _diptest.diptest_pval_mt(
-                dipstat=dip,
-                n=n,
-                n_boot=n_boot,
-                allow_zero=allow_zero,
-                seed=seed or 0,
-                n_threads=n_threads
-            )
-            return dip, pval
-        elif n_threads > 1 and not _diptest._has_openmp_support:
-            warnings.warn("Extension was compiled without parallelisation support, ignoring ``n_threads``")
-        if stream > Consts._UINT64_T_MAX:
-            raise ValueError("`stream` must fit in a uint64_t.")
-        pval = _diptest.diptest_pval(
-            dipstat=dip,
-            n=n,
-            n_boot=n_boot,
-            allow_zero=allow_zero,
-            seed=seed or 0,
-            stream=stream,
-        )
-        return dip, pval
+        
+        kwargs = {
+            'dipstat': dip,
+            'n': n,
+            'n_boot': n_boot,
+            'allow_zero': allow_zero,
+            'seed': seed or 0,
+        }
 
-    i1 = int(Consts._SAMPLE_SIZE.searchsorted(n, side='left'))
-    i0 = i1 - 1
+        func = None
+        if n_threads > 1:
+            if _diptest._has_openmp_support:
+                kwargs['n_threads'] = threads
+                func = diptest.diptest_pval_mt
+            else:
+                warnings.warn(
+                    'Extension was compiled without parallelisation '
+                    'support, ignoring ``n_threads``'
+                )
 
-    # if n falls outside the range of tabulated sample sizes, use the
-    # critical values for the nearest tabulated n (i.e. treat them as
-    # 'asymptotic')
-    i0 = max(0, i0)
-    i1 = min(20, i1)
-
-    # interpolate on sqrt(n)
-    n0, n1 = Consts._SAMPLE_SIZE[[i0, i1]]
-
-    y0 = np.sqrt(n0) * Consts._CRIT_VALS[i0]
-    sD = np.sqrt(n) * dip
-    if (i0 == i1):
-        xp = y0
+        if func is None:
+            if stream > Consts._UINT64_T_MAX:
+                raise ValueError('`stream` must fit in a uint64_t.')
+            else:
+                kwargs['stream'] = stream
+                func = _diptest.diptest_pval
+        
+        pval = func(**kwargs)
     else:
-        fn = float(n - n0) / (n1 - n0)
-        y1 = np.sqrt(n1) * Consts._CRIT_VALS[i1]
-        xp = y0 + fn * (y1 - y0)
+        pval = Consts.compute_pval_interpolation(n, dip)
 
-    pval = 1. - np.interp(sD, xp, Consts._ALPHA)
-
-    return dip, float(pval)
+    if full_output:
+        return dip, pval, r[1]
+    else:
+        return dip, pval
