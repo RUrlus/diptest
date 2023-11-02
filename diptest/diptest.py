@@ -1,10 +1,10 @@
 import warnings
-import psutil
 
 import numpy as np
+import psutil
 
-from diptest.lib import _diptest
 from diptest.consts import Consts
+from diptest.lib import _diptest
 
 _N_CORES = psutil.cpu_count(logical=False)
 _N_CORES_MIN1 = _N_CORES - 1
@@ -62,23 +62,20 @@ def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
     if sort_x:
         x = np.sort(x)
     elif not isinstance(x, np.ndarray):
-        x = np.asarray(x, order='C')
+        x = np.asarray(x, order="C")
     elif not (x.flags.c_contiguous or x.flags.c_contiguous):
-        x = np.copy(x, order='C')
+        x = np.copy(x, order="C")
 
-    if ((x.ndim > 1) and not (
-            (x.shape[1] == 1) or (x.shape[0]== 1)
-        )
-    ):
-        raise TypeError('x should be one-dimensional')
+    if (x.ndim > 1) and not ((x.shape[1] == 1) or (x.shape[0] == 1)):
+        raise TypeError("x should be one-dimensional")
 
     if full_output:
         res = _diptest.diptest_full(x, allow_zero, debug)
-        dip = res.pop('dip')
-        _gcm = res.pop('_gcm')
-        res['gcm'] = _gcm[:res.pop('_lh_2')]
-        _lcm = res.pop('_lcm')
-        res['lcm'] = _lcm[:res.pop('_lh_3')]
+        dip = res.pop("dip")
+        _gcm = res.pop("_gcm")
+        res["gcm"] = _gcm[: res.pop("_lh_2")]
+        _lcm = res.pop("_lcm")
+        res["lcm"] = _lcm[: res.pop("_lh_3")]
         return float(dip), res
     return float(_diptest.diptest(x, allow_zero, debug))
 
@@ -162,20 +159,20 @@ def diptest(
     dip = r if not full_output else r[0]
 
     if n <= 3:
-        warnings.warn('Dip test is not valid for n <= 3')
+        warnings.warn("Dip test is not valid for n <= 3")
         return (dip, 1.0) if not full_output else (dip, 1.0, r[1])
 
     if boot_pval:
         n_threads = n_threads or _DEFAULT_N_THREADS
         if n_threads == -1:
             n_threads = _N_CORES
-        
+
         kwargs = {
-            'dipstat': dip,
-            'n': n,
-            'n_boot': n_boot,
-            'allow_zero': allow_zero,
-            'seed': seed or 0,
+            "dipstat": dip,
+            "n": n,
+            "n_boot": n_boot,
+            "allow_zero": allow_zero,
+            "seed": seed or 0,
         }
 
         func = None
@@ -185,17 +182,17 @@ def diptest(
                 func = diptest.diptest_pval_mt
             else:
                 warnings.warn(
-                    'Extension was compiled without parallelisation '
-                    'support, ignoring ``n_threads``'
+                    "Extension was compiled without parallelisation "
+                    "support, ignoring ``n_threads``"
                 )
 
         if func is None:
             if stream > Consts._UINT64_T_MAX:
-                raise ValueError('`stream` must fit in a uint64_t.')
+                raise ValueError("`stream` must fit in a uint64_t.")
             else:
-                kwargs['stream'] = stream
+                kwargs["stream"] = stream
                 func = _diptest.diptest_pval
-        
+
         pval = func(**kwargs)
     else:
         pval = Consts.compute_pval_interpolation(n, dip)
