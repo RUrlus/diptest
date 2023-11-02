@@ -178,8 +178,8 @@ def diptest(
         func = None
         if n_threads > 1:
             if _diptest._has_openmp_support:
-                kwargs['n_threads'] = threads
-                func = diptest.diptest_pval_mt
+                kwargs["n_threads"] = n_threads
+                func = _diptest.diptest_pval_mt
             else:
                 warnings.warn(
                     "Extension was compiled without parallelisation "
