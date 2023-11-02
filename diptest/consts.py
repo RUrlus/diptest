@@ -47,3 +47,50 @@ class Consts(object, metaclass=ReadOnlyClass):
     _MAX_SAMPLE_SIZE = 72000
     #  The required type for stream ops: 
     _UINT64_T_MAX = np.iinfo(np.uint64).max
+
+    @classmethod
+    def compute_pval_interpolation(cls, n, dip):
+        """
+        Compute the p-value using interpolation on sqrt(n) based on the dip test's critical values.
+
+        Given the sample size `n` and the computed dip statistic, this function 
+        calculates the p-value using a lookup table of critical values. The function 
+        determines the appropriate indices in the table based on the sample size, 
+        interpolates the critical values using `sqrt(n)`, and computes the p-value.
+
+        Parameters
+        ----------
+        n : int
+            The sample size.
+        dip : float
+            The computed dip statistic.
+
+        Returns
+        -------
+        pval : float
+            The p-value for the test.
+        """
+        i1 = int(cls._SAMPLE_SIZE.searchsorted(n, side='left'))
+        i0 = i1 - 1
+
+        # If n falls outside the range of tabulated sample sizes, use the
+        # critical values for the nearest tabulated n (i.e. treat them as
+        # 'asymptotic')
+        i0 = max(0, i0)
+        i1 = min(cls._CRIT_VALS.shape[0], i1)
+
+        # Interpolate on sqrt(n)
+        n0, n1 = cls._SAMPLE_SIZE[[i0, i1]]
+
+        y0 = np.sqrt(n0) * cls._CRIT_VALS[i0]
+        sD = np.sqrt(n) * dip
+        if i0 == i1:
+            xp = y0
+        else:
+            fn = float(n - n0) / (n1 - n0)
+            y1 = np.sqrt(n1) * cls._CRIT_VALS[i1]
+            xp = y0 + fn * (y1 - y0)
+
+        pval = 1. - np.interp(sD, xp, cls._ALPHA)
+
+        return float(pval)
