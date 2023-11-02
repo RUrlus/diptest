@@ -1,5 +1,14 @@
 # Diptest Changelog
 
+## v0.6.0 -- November 2023
+
+### Enhancements
+
+* Add full output support in diptest by @prokolyvakis in https://github.com/RUrlus/diptest/pull/29
+
+
+**Full Changelog**: https://github.com/RUrlus/diptest/compare/v0.5.2...v0.6.0
+
 ## v0.5.2 -- December 2022
 
 ### Enhancements
