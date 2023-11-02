@@ -223,3 +223,14 @@ if _has_openmp_support:
             )
             assert np.isclose(dip, _TEST_SAMPLE_DIP)
             assert abs(_TEST_SAMPLE_PVAL - pv) < 5e3
+
+
+def test_diptest_full_output():
+    """Test diptest.diptest with full output."""
+    dip, pval, res = dt.diptest(_TEST_SAMPLE, full_output=True)
+    assert np.isclose(dip, _TEST_SAMPLE_DIP)
+    assert np.isclose(pval, _TEST_SAMPLE_TABLE_PVAL)
+    exp_keys = {'lo', 'hi', 'xl', 'xu', 'gcm', 'lcm'}
+    obs_keys = set(res.keys())
+    assert len(obs_keys - exp_keys) == 0
+    assert len(exp_keys - obs_keys) == 0
