@@ -1,0 +1,78 @@
+name: OpenMP Build
+
+on: 
+  pull_request:
+    branches:
+      - stable
+  schedule:
+    - cron: '0 23 * * 1'
+  push:
+    branches:
+      - stable
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pre_job:
+    # continue-on-error: true # Uncomment once integration is finished
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          # All of these options are optional, so you can remove them if you are happy with the defaults
+          cancel_others: 'true'
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
+  build:
+    name: OpenMP
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: 
+        - {
+            name: "Ubuntu (GCC-11)",
+            build_type: "Release",
+            cc: "gcc-11",
+            cxx: "g++-11",
+            generators: "Ninja",
+            target: "all"
+          }
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - uses: seanmiddleditch/gha-setup-ninja@master
+
+      - name: Print env
+        run: |
+          echo github.event.action: ${{ github.event.action }}
+          echo github.event_name: ${{ github.event_name }}
+
+      - name: Install python pacakges
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install numpy pytest
+          
+      - name: Install
+        run: |
+          CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=ON" pip install . -v
+
+      - name: Test
+        run: |
+          cd tests
+          python -m pytest test_diptest.py
