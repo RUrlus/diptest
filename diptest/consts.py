@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 
@@ -77,7 +79,12 @@ class Consts(object, metaclass=ReadOnlyClass):
         # critical values for the nearest tabulated n (i.e. treat them as
         # 'asymptotic')
         i0 = max(0, i0)
-        i1 = min(cls._CRIT_VALS.shape[0], i1)
+        if i1 > cls._CRIT_VALS.shape[0] - 1:
+            i1 = cls._CRIT_VALS.shape[0] - 1
+            warnings.warn(
+                f"Sample size exceeds the maximum limit of {cls._MAX_SAMPLE_SIZE}. "
+                 "Results may not be accurate with precomputed statistical values."
+            )
 
         # Interpolate on sqrt(n)
         n0, n1 = cls._SAMPLE_SIZE[[i0, i1]]
