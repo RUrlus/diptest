@@ -23,7 +23,7 @@ NAME = "diptest"
 
 MAJOR = 0
 REVISION = 6
-PATCH = 0
+PATCH = 1
 DEV = False
 
 VERSION = "{major}.{revision}.{patch}".format(
