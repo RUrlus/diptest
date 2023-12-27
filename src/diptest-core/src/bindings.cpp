@@ -10,7 +10,7 @@
 namespace diptest {
 namespace bindings {
 
-PYBIND11_MODULE(EXTENSION_MODULE_NAME, m) {
+PYBIND11_MODULE(_diptest_core, m) {
     bind_diptest(m);
     bind_diptest_full(m);
     bind_diptest_pval(m);
