@@ -1,14 +1,18 @@
-import numpy as np
+from __future__ import annotations
+
 import multiprocessing
 
-import diptest
+import numpy as np
 
 try:
-    from diptest.lib._diptest import pcg_seed_test
-    from diptest.lib._diptest import pcg_set_stream_test
-    from diptest.lib._diptest import _has_openmp_support
+    from diptest.lib._diptest_core import (
+        _has_openmp_support,
+        pcg_seed_test,
+        pcg_set_stream_test,
+    )
+
     if _has_openmp_support:
-        from diptest.lib._diptest import pcg_mt_stream_test
+        from diptest.lib._diptest_core import pcg_mt_stream_test
     _has_support = True
 except ImportError:
     _has_support = False
@@ -36,10 +40,7 @@ if _has_support:
     def test_pcg_set_seed_stream():
         N = 100000
         streams = np.random.randint(
-            0,
-            np.iinfo(np.uint64).max,
-            size=10,
-            dtype=np.uint64
+            0, np.iinfo(np.uint64).max, size=10, dtype=np.uint64
         )
 
         SEED = 42
@@ -58,6 +59,7 @@ if _has_support:
         assert not np.isclose(s1, s2).all()
 
     if _has_openmp_support and CORE_CNT > 1:
+
         def test_pcg_mt_seed_stream():
             N = 100000
             SEED = 42
