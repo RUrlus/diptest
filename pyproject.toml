@@ -1,10 +1,99 @@
 [build-system]
-requires = [
-    "setuptools",
-    "wheel",
-    "scikit-build>=0.14.1",
-    "ninja; platform_system!='Windows'",
-    "cmake>=3.16",
-    "pybind11>=2.8.1",
+requires = ["scikit-build-core>=0.3.3", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+
+[project]
+name = "diptest"
+version = "0.6.1"
+description = "Hartigan's diptest."
+readme = "README.md"
+authors = [{ name = "Ralph Urlus", email = "rurlus.dev@email.com" }]
+requires-python = ">=3.7"
+license = { text = "GPLv2+" }
+
+dependencies = ["psutil", "numpy>=1.18"]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.urls]
+Source = "https://github.com/RUrlus/diptest"
+Documentation = "https://github.com/RUrlus/diptest#readme"
+Issues = "https://github.com/RUrlus/diptest/issues"
+
+[tool.scikit-build]
+wheel.expand-macos-universal-tags = true
+sdist.include = [
+    "src/diptest",
+    "src/diptest_core",
+    "src/external",
+    "CMakeLists.txt",
 ]
-build-backend = "setuptools.build_meta"
+wheel.py-api = "cp37"
+
+[tool.scikit-build.cmake.define]
+DIPTEST_CPP_STANDARD = "11"
+DIPTEST_ENABLE_DEVMODE = false
+DIPTEST_ENABLE_DEBUG = false
+DIPTEST_ENABLE_OPENMP = false
+DIPTEST_ENABLE_EXT_TESTS = false
+DIPTEST_ENABLE_ARCH_FLAGS = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+log_cli_level = "INFO"
+filterwarnings = ["error"]
+testpaths = ["tests"]
+
+
+[tool.cibuildwheel]
+test-command = "pytest {project}/tests"
+test-extras = ["test"]
+test-skip = ["*universal2:arm64"]
+build-verbosity = 1
+
+
+[tool.ruff]
+src = ["src"]
+
+[tool.ruff.lint]
+extend-select = [
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "ARG", # flake8-unused-arguments
+    "C4",  # flake8-comprehensions
+    "EM",  # flake8-errmsg
+    "ICN", # flake8-import-conventions
+    "G",   # flake8-logging-format
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PL",  # pylint
+    "PT",  # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "RET", # flake8-return
+    "RUF", # Ruff-specific
+    "SIM", # flake8-simplify
+    "T20", # flake8-print
+    "UP",  # pyupgrade
+    "YTT", # flake8-2020
+    "EXE", # flake8-executable
+    "NPY", # NumPy specific rules
+    "PD",  # pandas-vet
+]
+ignore = [
+    "PLR09",   # Too many X
+    "PLR2004", # Magic comparison
+]
+isort.required-imports = ["from __future__ import annotations"]
+
+[tool.ruff.isort]
+split-on-trailing-comma = false
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]
