@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import multiprocessing
-import os
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pytest
 
 import diptest as dt
-from diptest.lib._diptest import _has_openmp_support
+from diptest.lib._diptest_core import _has_openmp_support
 
-_cdir = os.path.dirname(os.path.realpath(__file__))
-_TEST_SAMPLE = np.load(os.path.join(_cdir, "test_sample.npy"))
+_cdir = Path(__file__).parent
+_TEST_SAMPLE = np.load(_cdir / "test_sample.npy")
 _TEST_SAMPLE_DIP = 0.0159638598499375
 _TEST_SAMPLE_PVAL = 0.083635
 _TEST_SAMPLE_TABLE_PVAL = 0.0867741514531395
@@ -47,7 +49,8 @@ def _generator(N, distance=0.5, sigma=1.0):
     elif isinstance(sigma, (tuple, list)):
         sigma_a, sigma_b = sigma
     else:
-        raise TypeError("`sigma` must be a float or tuple of floats")
+        msg = "`sigma` must be a float or tuple of floats"
+        raise TypeError(msg)
 
     sample = np.empty(N, dtype=np.float64)
     sample[:lN] = np.random.normal(loc=mu_a, scale=sigma_a, size=lN)

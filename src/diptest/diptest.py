@@ -1,21 +1,26 @@
+from __future__ import annotations
+
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 import psutil
 
 from diptest.consts import Consts
-from diptest.lib import _diptest
+from diptest.lib import _diptest_core as _diptest
+
+if TYPE_CHECKING:
+    from typing import Any
 
 _N_CORES = psutil.cpu_count(logical=False)
 _N_CORES_MIN1 = _N_CORES - 1
 
-if _diptest._has_openmp_support:
-    _DEFAULT_N_THREADS = min(_N_CORES_MIN1, 4)
-else:
-    _DEFAULT_N_THREADS = 1
+_DEFAULT_N_THREADS = min(_N_CORES_MIN1, 4) if _diptest._has_openmp_support else 1
 
 
-def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
+def dipstat(
+    x, full_output=False, allow_zero=True, sort_x=True, debug=0
+) -> float | tuple[float, dict[str, Any]]:
     """
     Hartigan & Hartigan's dip statistic
 
@@ -67,7 +72,8 @@ def dipstat(x, full_output=False, allow_zero=True, sort_x=True, debug=0):
         x = np.copy(x, order="C")
 
     if (x.ndim > 1) and not ((x.shape[1] == 1) or (x.shape[0] == 1)):
-        raise TypeError("x should be one-dimensional")
+        msg = "x should be one-dimensional"
+        raise TypeError(msg)
 
     if full_output:
         res = _diptest.diptest_full(x, allow_zero, debug)
@@ -159,7 +165,7 @@ def diptest(
     dip = r if not full_output else r[0]
 
     if n <= 3:
-        warnings.warn("Dip test is not valid for n <= 3")
+        warnings.warn("Dip test is not valid for n <= 3", stacklevel=1)
         return (dip, 1.0) if not full_output else (dip, 1.0, r[1])
 
     if boot_pval:
@@ -181,17 +187,15 @@ def diptest(
                 kwargs["n_threads"] = n_threads
                 func = _diptest.diptest_pval_mt
             else:
-                warnings.warn(
-                    "Extension was compiled without parallelisation "
-                    "support, ignoring ``n_threads``"
-                )
+                msg = "Extension was compiled without parallelisation support, ignoring ``n_threads``"
+                warnings.warn(msg, stacklevel=1)
 
         if func is None:
             if stream > Consts._UINT64_T_MAX:
-                raise ValueError("`stream` must fit in a uint64_t.")
-            else:
-                kwargs["stream"] = stream
-                func = _diptest.diptest_pval
+                msg = "`stream` must fit in a uint64_t."
+                raise ValueError(msg)
+            kwargs["stream"] = stream
+            func = _diptest.diptest_pval
 
         pval = func(**kwargs)
     else:
@@ -199,5 +203,4 @@ def diptest(
 
     if full_output:
         return dip, pval, r[1]
-    else:
-        return dip, pval
+    return dip, pval
