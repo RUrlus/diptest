@@ -25,12 +25,11 @@ Issues = "https://github.com/RUrlus/diptest/issues"
 [tool.scikit-build]
 wheel.expand-macos-universal-tags = true
 sdist.include = [
-    "src/diptest",
-    "src/diptest_core",
-    "src/external",
-    "CMakeLists.txt",
+  "src/diptest",
+  "src/diptest_core",
+  "src/external",
+  "CMakeLists.txt",
 ]
-wheel.py-api = "cp37"
 
 [tool.scikit-build.cmake.define]
 DIPTEST_CPP_STANDARD = "11"
@@ -61,31 +60,31 @@ src = ["src"]
 
 [tool.ruff.lint]
 extend-select = [
-    "B",   # flake8-bugbear
-    "I",   # isort
-    "ARG", # flake8-unused-arguments
-    "C4",  # flake8-comprehensions
-    "EM",  # flake8-errmsg
-    "ICN", # flake8-import-conventions
-    "G",   # flake8-logging-format
-    "PGH", # pygrep-hooks
-    "PIE", # flake8-pie
-    "PL",  # pylint
-    "PT",  # flake8-pytest-style
-    "PTH", # flake8-use-pathlib
-    "RET", # flake8-return
-    "RUF", # Ruff-specific
-    "SIM", # flake8-simplify
-    "T20", # flake8-print
-    "UP",  # pyupgrade
-    "YTT", # flake8-2020
-    "EXE", # flake8-executable
-    "NPY", # NumPy specific rules
-    "PD",  # pandas-vet
+  "B",   # flake8-bugbear
+  "I",   # isort
+  "ARG", # flake8-unused-arguments
+  "C4",  # flake8-comprehensions
+  "EM",  # flake8-errmsg
+  "ICN", # flake8-import-conventions
+  "G",   # flake8-logging-format
+  "PGH", # pygrep-hooks
+  "PIE", # flake8-pie
+  "PL",  # pylint
+  "PT",  # flake8-pytest-style
+  "PTH", # flake8-use-pathlib
+  "RET", # flake8-return
+  "RUF", # Ruff-specific
+  "SIM", # flake8-simplify
+  "T20", # flake8-print
+  "UP",  # pyupgrade
+  "YTT", # flake8-2020
+  "EXE", # flake8-executable
+  "NPY", # NumPy specific rules
+  "PD",  # pandas-vet
 ]
 ignore = [
-    "PLR09",   # Too many X
-    "PLR2004", # Magic comparison
+  "PLR09",   # Too many X
+  "PLR2004", # Magic comparison
 ]
 isort.required-imports = ["from __future__ import annotations"]
 
