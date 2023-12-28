@@ -1,11 +1,28 @@
 # Diptest Changelog
 
+## v0.7.0 -- December 2023
+
+* ENH: Add support for Python 3.12 by @rurlus
+* MAINT: Switch to scikit-build-core as build system by @rurlus
+* FIX: Correct off-by-one error in the indexes of the full results by @rurlus
+
+## v0.6.1 -- November 2023
+
+### Fix
+
+* FIX: Correct the out of index error in interpolation by @prokolyvakis in https://github.com/RUrlus/diptest/pull/32
+
 ## v0.6.0 -- November 2023
 
 ### Enhancements
 
 * Add full output support in diptest by @prokolyvakis in https://github.com/RUrlus/diptest/pull/29
 
+## v0.6.0 -- November 2023
+
+### Enhancements
+
+* Add full output support in diptest by @prokolyvakis in https://github.com/RUrlus/diptest/pull/29
 
 **Full Changelog**: https://github.com/RUrlus/diptest/compare/v0.5.2...v0.6.0
 
