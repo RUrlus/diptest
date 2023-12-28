@@ -4,6 +4,7 @@
 #include <pybind11/pybind11.h>
 #include <diptest/bootstrap.hpp>
 #include <diptest/dipstat.hpp>
+#include <diptest/iterative.hpp>
 #if defined(DIPTEST_BUILD_CPP_TESTS)
 #include <diptest/test_pcg.hpp>
 #endif  // DIPTEST_BUILD_CPP_TESTS
@@ -15,6 +16,8 @@ PYBIND11_MODULE(_diptest_core, m) {
     bind_diptest(m);
     bind_diptest_full(m);
     bind_diptest_pval(m);
+    bind_mirror_array(m);
+    bind_iterdip(m);
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
     bind_diptest_pval_mt(m);
 #endif
