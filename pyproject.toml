@@ -5,7 +5,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "diptest"
-version = "0.6.1"
+version = "0.7.0"
 description = "Hartigan's diptest."
 readme = "README.md"
 authors = [{ name = "Ralph Urlus", email = "rurlus.dev@email.com" }]
