@@ -48,32 +48,32 @@ jobs:
 
       - name: Install python packages
         run: |
-          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install --upgrade pip wheel
           python -m pip install --upgrade pybind11 cmake ninja pytest
 
+      - name: Install python package
+        run: |
+          SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON -DDIPTEST_ENABLE_OPENMP=ON" python -m pip install -e . -v
           
       - name: Configure
         run: |
           cmake -S . -G Ninja -B build \
-              -DCMAKE_BUILD_TYPE=Debug \
+              -DCMAKE_BUILD_TYPE=Asan \
+              -DLDFLAGS=-shared-libasan \
+              -DSKBUILD_PROJECT_NAME="diptest" \
+              -DSKBUILD_PROJECT_VERSION="0.0.0" \
+              -DDIPTEST_MBUILD=ON \
               -DDIPTEST_ENABLE_DEBUG=OFF \
               -DDIPTEST_ENABLE_OPENMP=ON \
               -Dpybind11_DIR=$(python3 -c 'import pybind11; print(pybind11.get_cmake_dir())') \
               -DCMAKE_C_COMPILER=clang-14 \
-              -DCMAKE_CXX_COMPILER=clang++-14 \
-              -DCMAKE_INSTALL_PREFIX:PATH=. \
-              -DCMAKE_BUILD_TYPE=Asan \
-              -DLDFLAGS=-shared-libasan
+              -DCMAKE_CXX_COMPILER=clang++-14
 
       - name: Build
         run: |
           cmake --build build \
           --target install \
           --config Asan
-
-      - name: Install packages
-        run: |
-          DIPTEST_MANUAL_BUILD=ON python -m pip install -e . -v
 
       - name: Test
         run: |
