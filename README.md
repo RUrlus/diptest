@@ -33,10 +33,10 @@ diptest can be installed from PyPi using:
 
 Wheels containing the pre-compiled extension are available for:
 
-- Windows x84-64 - CPython 3.7 - 3.11
-- Linux x84-64 - CPython 3.7 - 3.11
-- MacOS x84-64 - CPython 3.7 - 3.11
-- MacOS ARM-64 - CPython 3.8 - 3.11
+- Windows x84-64 - CPython 3.7 - 3.12
+- Linux x84-64 - CPython 3.7 - 3.12
+- MacOS x84-64 - CPython 3.7 - 3.12
+- MacOS ARM-64 - CPython 3.8 - 3.12
 
 If you have a C/C++ compiler available it is advised to install without
 the wheel as this enables architecture specific optimisations.
@@ -59,21 +59,21 @@ Compatible compilers through Pybind11:
 
 To enable OpenMP use:
 ```bash
-    CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=ON" pip install diptest --no-binary diptest
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=ON" pip install diptest --no-binary diptest
 ```
 
 #### Debug installation
 
 To enable a debug build use:
 ```bash
-    CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug" pip install diptest --no-binary diptest
+    SKBUILD_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug" pip install diptest --no-binary diptest
 ```
 
 #### Debug printing
 
 To enable the debug print statements use:
 ```bash
-    CMAKE_ARGS="-DDIPTEST_ENABLE_DEBUG=ON" pip install diptest --no-binary diptest
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_DEBUG=ON" pip install diptest --no-binary diptest
 ```
 then call the function with debug argument set to a value greater than zero:
 ```python3
