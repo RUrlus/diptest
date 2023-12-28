@@ -19,7 +19,7 @@ set(DIPTEST_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/src/diptest-core/include")
 set(DIPTEST_PCG_INCLUDE_DIR
     "${PROJECT_SOURCE_DIR}/src/external/pcg-cpp/include")
 set(DIPTEST_SRC_DIR "${PROJECT_SOURCE_DIR}/src/diptest-core/src/")
-set(DIPTEST_SRC_FILES bindings.cpp wrapper.cpp)
+set(DIPTEST_SRC_FILES bindings.cpp bootstrap.cpp dipstat.cpp)
 
 if(DIPTEST_ENABLE_EXT_TESTS OR DIPTEST_DEV_MODE)
   add_definitions(-DDIPTEST_BUILD_CPP_TESTS=TRUE)
