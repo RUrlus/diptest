@@ -62,16 +62,21 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
         debug);
 
     using namespace pybind11::literals;  // to bring in the `_a` literal NOLINT
+    // NOTE `diptst` uses indexing starting from 1, so all the indexes returned
+    // need to be corrected
+    int lo = lo_hi[0] - 1;
+    int hi = lo_hi[1] - 1;
     return py::dict(
         "dip"_a = dip,
-        "lo"_a = lo_hi[0],
-        "hi"_a = lo_hi[1],
-        "xl"_a = x.at(lo_hi[0]),
-        "xu"_a = x.at(lo_hi[1]),
+        "lo"_a = lo,
+        "hi"_a = hi,
+        "xl"_a = x.at(lo),
+        "xu"_a = x.at(hi),
         "_gcm"_a = gcm,
         "_lcm"_a = lcm,
-        "_lh_2"_a = lo_hi[2],
-        "_lh_3"_a = lo_hi[3]);
+        "_lh_2"_a = lo_hi[2] - 1,
+        "_lh_3"_a = lo_hi[3] - 1
+    );
 }  // diptest_full
 
 double diptest_pval(
