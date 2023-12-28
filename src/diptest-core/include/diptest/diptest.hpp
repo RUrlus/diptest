@@ -60,8 +60,7 @@
  * @date 2022-06-27
  *
  */
-#ifndef INCLUDE_DIPTEST_DIPTEST_HPP_
-#define INCLUDE_DIPTEST_DIPTEST_HPP_
+#pragma once
 #define UNUSED(expr)  \
     do {              \
         (void)(expr); \
@@ -92,7 +91,7 @@ enum ConvexEnvelopeType { MAJORANT, MINORANT };
  * @param idx the index at which the dip value is reported
  */
 class Dip {
-   public:
+ public:
     double val;
     int idx;
 
@@ -156,7 +155,7 @@ inline void Dip::maybe_update(const Dip& other) {
  * @param type the type of the fit, i.e., either gcm or lcm fit
  */
 class ConvexEnvelope {
-   public:
+ public:
     const double* arr;
     int *optimum, *indices;
     const int size;
@@ -170,7 +169,8 @@ class ConvexEnvelope {
         int* optimum,
         int* indices,
         int size,
-        ConvexEnvelopeType type)
+        ConvexEnvelopeType type
+    )
         : arr(arr),
           optimum(optimum),
           indices(indices),
@@ -184,7 +184,35 @@ class ConvexEnvelope {
      * (or majorant) fit
      *
      */
-    void compute_indices();
+    void compute_indices() {
+        const int offset = (type == MINORANT) ? +1 : -1;
+        const int start = (type == MINORANT) ? 1 : size;
+        const int end = size + 1 - start;
+
+        indices[start] = start;
+
+        for (int i = start + offset; offset * (end - i) >= 0; i += offset) {
+            indices[i] = i - offset;
+
+            while (true) {
+                int ind_at_i = indices[i];
+                int ind_at_i_iter = indices[ind_at_i];
+
+                /**
+                 * We compare the rate of change of arr, i.e.,
+                 * (arr[x]-arr[y])/(x-y), at the indices: a. (i, ind_at_i) b.
+                 * (ind_at_i, ind_at_i_iter)
+                 */
+                bool rate_change_flag
+                    = (arr[i] - arr[ind_at_i]) * (ind_at_i - ind_at_i_iter)
+                      < (arr[ind_at_i] - arr[ind_at_i_iter]) * (i - ind_at_i);
+
+                if (ind_at_i == start || rate_change_flag)
+                    break;
+                indices[i] = ind_at_i_iter;
+            }
+        }
+    }
 
     /**
      * @brief Computes the dip in the convex minorant (or majorant)
@@ -192,68 +220,36 @@ class ConvexEnvelope {
      * @return the dip value and the index over which the dip was reported in
      * the array
      */
-    Dip compute_dip();
-};
+    Dip compute_dip() {
+        const int offset = (type == MINORANT) ? 0 : 1;
+        const int sign = 1 + -2 * offset;
 
-inline void ConvexEnvelope::compute_indices() {
-    const int offset = (type == MINORANT) ? +1 : -1;
-    const int start = (type == MINORANT) ? 1 : size;
-    const int end = size + 1 - start;
+        Dip ret_dip(0., -1);
+        Dip tmp_dip(1., -1);
 
-    indices[start] = start;
+        for (int j = x; j < rel_length; ++j) {
+            int j_start = optimum[j + 1 - offset], j_end = optimum[j + offset];
 
-    for (int i = start + offset; offset * (end - i) >= 0; i += offset) {
-        indices[i] = i - offset;
+            if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
+                double C = (j_end - j_start) / (arr[j_end] - arr[j_start]);
 
-        while (true) {
-            int ind_at_i = indices[i];
-            int ind_at_i_iter = indices[ind_at_i];
+                for (int jj = j_start; jj <= j_end; ++jj) {
+                    double d = sign
+                               * ((jj - j_start + sign)
+                                  - (arr[jj] - arr[j_start]) * C);
 
-            /**
-             * We compare the rate of change of arr, i.e.,
-             * (arr[x]-arr[y])/(x-y), at the indices: a. (i, ind_at_i) b.
-             * (ind_at_i, ind_at_i_iter)
-             */
-            bool rate_change_flag
-                = (arr[i] - arr[ind_at_i]) * (ind_at_i - ind_at_i_iter)
-                  < (arr[ind_at_i] - arr[ind_at_i_iter]) * (i - ind_at_i);
-
-            if (ind_at_i == start || rate_change_flag)
-                break;
-            indices[i] = ind_at_i_iter;
-        }
-    }
-}
-
-inline Dip ConvexEnvelope::compute_dip() {
-    const int offset = (type == MINORANT) ? 0 : 1;
-    const int sign = 1 + -2 * offset;
-
-    Dip ret_dip(0., -1);
-    Dip tmp_dip(1., -1);
-
-    for (int j = x; j < rel_length; ++j) {
-        int j_start = optimum[j + 1 - offset], j_end = optimum[j + offset];
-
-        if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
-            double C = (j_end - j_start) / (arr[j_end] - arr[j_start]);
-
-            for (int jj = j_start; jj <= j_end; ++jj) {
-                double d
-                    = sign
-                      * ((jj - j_start + sign) - (arr[jj] - arr[j_start]) * C);
-
-                tmp_dip.maybe_update(d, jj);
+                    tmp_dip.maybe_update(d, jj);
+                }
             }
+
+            ret_dip.maybe_update(tmp_dip);
+            tmp_dip.val = 1.;
+            tmp_dip.idx = -1;
         }
 
-        ret_dip.maybe_update(tmp_dip);
-        tmp_dip.val = 1.;
-        tmp_dip.idx = -1;
+        return ret_dip;
     }
-
-    return ret_dip;
-}
+};
 
 /**
  * @brief Computes the greatest distance between the gcm and lcm
@@ -264,8 +260,9 @@ inline Dip ConvexEnvelope::compute_dip() {
  * `DDIPTEST_ENABLE_DEBUG=ON`
  * @return the maximum distance
  */
-inline double
-max_distance(ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug) {
+inline double max_distance(
+    ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug
+) {
 #ifndef DDIPTEST_ENABLE_DEBUG
     UNUSED(debug);
 #endif  // DDIPTEST_ENABLE_DEBUG
@@ -353,7 +350,8 @@ double diptst(
     int* mn,
     int* mj,
     const int min_is_0,
-    const int debug) {
+    const int debug
+) {
 /**
  * `low` contains the index of the current estimate  of the lower end.
  * of the modal interval, `high` contains the index for the upper end.
@@ -564,5 +562,3 @@ L_END:
 #undef high
 #undef l_gcm
 #undef l_lcm
-
-#endif  // INCLUDE_DIPTEST_DIPTEST_HPP_

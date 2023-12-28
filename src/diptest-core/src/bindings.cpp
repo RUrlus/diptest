@@ -2,7 +2,8 @@
  * Copyright 2022 Ralph Urlus
  */
 #include <pybind11/pybind11.h>
-#include <diptest/wrapper.hpp>
+#include <diptest/bootstrap.hpp>
+#include <diptest/dipstat.hpp>
 #if defined(DIPTEST_BUILD_CPP_TESTS)
 #include <diptest/test_pcg.hpp>
 #endif  // DIPTEST_BULD_CPP_TESTS

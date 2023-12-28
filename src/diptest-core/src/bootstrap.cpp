@@ -1,83 +1,15 @@
 /* wrapper.cpp -- implementation of wrapper around diptst from diptest.c
  * Copyright 2022 R. Urlus
  */
-#include <diptest/wrapper.hpp>
+#include <diptest/bootstrap.hpp>
+#include <functional>
+#include <memory>
+#include <queue>
+#include <vector>
 
 namespace py = pybind11;
 
 namespace diptest {
-
-namespace details {
-
-inline double diptest(const double* x_ptr, int N, int allow_zero, int debug) {
-    std::array<int, 4> lo_hi = {0, 0, 0, 0};
-    std::unique_ptr<int[]> gcm(new int[N]);
-    std::unique_ptr<int[]> lcm(new int[N]);
-    std::unique_ptr<int[]> mn(new int[N]);
-    std::unique_ptr<int[]> mj(new int[N]);
-
-    double dip = diptst<true>(
-        x_ptr,
-        N,
-        lo_hi.data(),
-        gcm.get(),
-        lcm.get(),
-        mn.get(),
-        mj.get(),
-        allow_zero,
-        debug);
-    return dip;
-}  // diptest
-
-}  // namespace details
-
-double diptest(const py::array_t<double>& x, int allow_zero, int debug) {
-    return details::diptest(x.data(), x.size(), allow_zero, debug);
-}  // diptest
-
-py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
-    const double* x_ptr = x.data();
-    int N = x.size();
-    std::array<int, 4> lo_hi = {0, 0, 0, 0};
-
-    auto gcm = py::array_t<int>(N);
-    auto lcm = py::array_t<int>(N);
-    int* gcm_ptr = gcm.mutable_data();
-    int* lcm_ptr = lcm.mutable_data();
-
-    std::unique_ptr<int[]> mn(new int[N]);
-    std::unique_ptr<int[]> mj(new int[N]);
-    int* mn_ptr = mn.get();
-    int* mj_ptr = mj.get();
-
-    double dip = diptst<true>(
-        x_ptr,
-        N,
-        lo_hi.data(),
-        gcm_ptr,
-        lcm_ptr,
-        mn_ptr,
-        mj_ptr,
-        allow_zero,
-        debug);
-
-    using namespace pybind11::literals;  // to bring in the `_a` literal NOLINT
-    // NOTE `diptst` uses indexing starting from 1, so all the indexes returned
-    // need to be corrected
-    int lo = lo_hi[0] - 1;
-    int hi = lo_hi[1] - 1;
-    return py::dict(
-        "dip"_a = dip,
-        "lo"_a = lo,
-        "hi"_a = hi,
-        "xl"_a = x.at(lo),
-        "xu"_a = x.at(hi),
-        "_gcm"_a = gcm,
-        "_lcm"_a = lcm,
-        "_lh_2"_a = lo_hi[2] - 1,
-        "_lh_3"_a = lo_hi[3] - 1
-    );
-}  // diptest_full
 
 double diptest_pval(
     const double dipstat,
@@ -87,9 +19,9 @@ double diptest_pval(
     int debug,
     uint64_t seed,
     uint64_t stream) {
-    pcg64_dxsm rng;
+    details::pcg64_dxsm rng;
     if (seed == 0) {
-        pcg_seed_seq seed_source;
+        details::pcg_seed_seq seed_source;
         rng.seed(seed_source);
     } else if (stream != 0) {
         rng.seed(seed, stream);
@@ -98,7 +30,6 @@ double diptest_pval(
     }
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    double dip;
     std::array<int, 4> lo_hi = {0, 0, 0, 0};
     std::unique_ptr<int[]> gcm(new int[n]);
     std::unique_ptr<int[]> lcm(new int[n]);
@@ -115,7 +46,7 @@ double diptest_pval(
             r_sample[j] = dist(rng);
         }
         std::sort(r_sample, sample_end);
-        dip = diptst<false>(
+        double dip = diptst<false>(
             r_sample,
             n,
             lo_hi.data(),
@@ -144,9 +75,9 @@ double diptest_pval_mt(
     uint64_t seed,
     size_t n_threads) {
     std::unique_ptr<bool[]> dips(new bool[n_boot]);
-    pcg64_dxsm global_rng;
+    details::pcg64_dxsm global_rng;
     if (seed == 0) {
-        pcg_seed_seq seed_source;
+        details::pcg_seed_seq seed_source;
         global_rng.seed(seed_source);
     } else {
         global_rng.seed(seed);
@@ -169,7 +100,7 @@ double diptest_pval_mt(
         // each other. Hence, we can use the same seed and a different stream to
         // draw independent samples from each thread without having to allocate
         // the whole block
-        pcg64_dxsm rng = global_rng;
+        details::pcg64_dxsm rng = global_rng;
         rng.set_stream(omp_get_thread_num() + 1);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
 
@@ -202,24 +133,6 @@ double diptest_pval_mt(
 #endif
 
 namespace bindings {
-
-void bind_diptest(py::module& m) {
-    m.def(
-        "diptest",
-        &diptest::diptest,
-        py::arg("x"),
-        py::arg("allow_zero") = 1,
-        py::arg("debug") = 0);
-}
-
-void bind_diptest_full(py::module& m) {
-    m.def(
-        "diptest_full",
-        &diptest::diptest_full,
-        py::arg("x"),
-        py::arg("allow_zero") = 1,
-        py::arg("debug") = 0);
-}
 
 void bind_diptest_pval(py::module& m) {
     m.def(
