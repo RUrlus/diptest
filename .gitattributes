@@ -1,1 +1,2 @@
-cmake/* linguist-vendored
+src/diptest-core/cmake/* linguist-vendored
+src/external/* linguist-vendored
