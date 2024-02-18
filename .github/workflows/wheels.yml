@@ -1,10 +1,11 @@
-name: Wheels
+name: Build and Publish
 
 on:
   workflow_dispatch:
   pull_request:
+  push:
     branches:
-      - stable
+     - main
   release:
     types:
       - published
@@ -18,18 +19,11 @@ jobs:
       with:
         submodules: true
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
-    - name: Install deps
-      run: python -m pip install twine build
-
     - name: Build SDist
-      run: python -m build -s
+      run: pipx run build --sdist
 
     - name: Check metadata
-      run: twine check dist/*
+      run: pipx run twine check dist/*
 
     - uses: actions/upload-artifact@v4
       with:
@@ -43,35 +37,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+    - uses: actions/setup-python@v3
 
     - name: Install cibuildwheel
-      run: python -m pip install cibuildwheel
+      run: python -m pip install cibuildwheel==2.16.5
 
-    - name: Build wheel
+    - name: Build wheels
       run: python -m cibuildwheel --output-dir wheelhouse
       env:
-        CIBW_ENVIRONMENT: MACOSX_DEPLOYMENT_TARGET="10.13" SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF"
-        CIBW_BUILD: 'cp38-* cp39-* cp310-* cp311-* cp312-*'
-        CIBW_TEST_EXTRAS: test
-        CIBW_TEST_COMMAND: python -m pytest {project}/tests/test_diptest.py
-        CIBW_ARCHS: "auto64"
-        CIBW_ARCHS_MACOS: "x86_64 arm64"
-        # Skip 32-bit builds
-        CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux_x86_64"
-
-    - name: Show files
-      run: ls -lh wheelhouse
-      shell: bash
+        CIBW_ENVIRONMENT: CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON"
+        CIBW_TEST_COMMAND: pytest {project}/tests && python -c "from diptest import _has_openmp_support; assert _has_openmp_support"
+        # only build for x86_64; ARM wheels are build seperately
+        CIBW_ARCHS_MACOS: "x86_64"
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.13" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON"
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -83,16 +68,69 @@ jobs:
         name: artifact-${{ matrix.os }}
         path: wheelhouse/*.whl
 
+  build_arm_wheels:
+    name: MacOS ARM wheels
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Cache OpenMP repo
+      id: clone-openmp
+      uses: actions/cache@v4
+      with:
+        path: llvm-project
+        key: macos-arm-openmp
+
+    - name: Clone OpenMP repo
+      if: steps.clone-openmp.outputs.cache-hit != 'true'
+      run: |
+        git clone --depth 1 --branch llvmorg-17.0.6 https://github.com/llvm/llvm-project
+
+    - name: Build OpenMP
+      shell: bash
+      run: |
+        mv llvm-project/openmp ./openmp
+        mv llvm-project/cmake ./cmake
+        rm -rf llvm-project
+        mkdir openmp_build
+        cmake -S openmp -B openmp_build \
+            -DCMAKE_OSX_ARCHITECTURES="arm64" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="10.13" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_INSTALL_PREFIX="/usr/local"
+        cmake --build openmp_build --target install --config Release
+
+    - uses: pypa/cibuildwheel@v2.16.2
+      env:
+        # only build for ARM; x86_64 wheels are build seperately
+        CIBW_ARCHS: "arm64"
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="10.13" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=/usr/local"
+
+    - name: Verify clean directory
+      run: git diff --exit-code
+      shell: bash
+
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifact-macos-arm
+        path: wheelhouse/*.whl
+
   upload_all:
     name: Upload if release
-    needs: [build_wheels, build_sdist]
+    needs: [build_sdist, build_wheels, build_arm_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
 
     steps:
-    - uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+    - uses: actions/setup-python@v4
 
     - uses: actions/download-artifact@v4
       with:
