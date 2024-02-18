@@ -13,73 +13,6 @@ unimodal distribution function that minimizes that maximum difference. Other
 than unimodality, it makes no further assumptions about the form of the null
 distribution.
 
-## Dependencies
-* `numpy`
-* [Optional] `OpenMP`
-
-Parallelisation of the p-value computation using bootstrapping is offered using OpenMP.
-OpenMP is disabled by default but can be enabled, see installation section
-below.
- Multi-threading can be turned off by setting the number of threads equal to 1. See the docstring of `diptest` for details.
-
-
-## Installation
-
-diptest can be installed from PyPi using:
-
-```bash
-    pip install diptest
-```
-
-Wheels containing the pre-compiled extension are available for:
-
-- Windows x84-64 - CPython 3.7 - 3.12
-- Linux x84-64 - CPython 3.7 - 3.12
-- MacOS x84-64 - CPython 3.7 - 3.12
-- MacOS ARM-64 - CPython 3.8 - 3.12
-
-If you have a C/C++ compiler available it is advised to install without
-the wheel as this enables architecture specific optimisations.
-
-```bash
-    pip install diptest --no-binary diptest
-```
-
-Compatible compilers through Pybind11:
-
-- Clang/LLVM 3.3 or newer (for Apple Xcode's clang, this is 5.0.0 or newer)
-- GCC 4.8 or newer
-- Microsoft Visual Studio 2015 Update 3 or newer
-- Intel classic C++ compiler 18 or newer (ICC 20.2 tested in CI)
-- Cygwin/GCC (previously tested on 2.5.1)
-- NVCC (CUDA 11.0 tested in CI)
-- NVIDIA PGI (20.9 tested in CI)
-
-#### Enable OpenMP
-
-To enable OpenMP use:
-```bash
-    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=ON" pip install diptest --no-binary diptest
-```
-
-#### Debug installation
-
-To enable a debug build use:
-```bash
-    SKBUILD_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug" pip install diptest --no-binary diptest
-```
-
-#### Debug printing
-
-To enable the debug print statements use:
-```bash
-    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_DEBUG=ON" pip install diptest --no-binary diptest
-```
-then call the function with debug argument set to a value greater than zero:
-```python3
-    diptest(x, debug=1)
-```
-
 ## Usage
 
 This library provides two functions:
@@ -107,6 +40,89 @@ Note that for larger samples (N > 1e5) this is quite compute and memory intensiv
     
     # both the dip statistic and p-value
     dip, pval = diptest.diptest(x)
+```
+
+## Dependencies
+* `numpy`
+* [Optional] `OpenMP`
+
+Parallelisation of the p-value computation using bootstrapping is offered using OpenMP.
+OpenMP is disabled by default but can be enabled, see installation section
+below.
+ Multi-threading can be turned off by setting the number of threads equal to 1. See the docstring of `diptest` for details.
+
+
+## Installation
+
+diptest can be installed from PyPi using:
+
+```bash
+    pip install diptest
+```
+
+Wheels containing the pre-compiled extension are available for:
+
+- Windows x84-64 - CPython 3.8 - 3.12
+- Linux x84-64 - CPython 3.8 - 3.12
+- MacOS x84-64 - CPython 3.8 - 3.12
+- MacOS ARM-64 - CPython 3.8 - 3.12
+
+Note that the wheels vendor/ships OpenMP with the extension to provide parallelisation out-of-the-box.
+If you run into issue with multiple versions of OpenMP being loaded you have two options: build from source or install a non-bundled wheel.
+
+### Non-bundled wheels
+
+We provide the same wheels without OpenMP bundled here: https://github.com/RUrlus/diptest/releases 
+You than install the wheel that corresponds to your Python and OS.
+For example, for CPython 3.11 and MacOS ARM:
+
+```shell
+pip install diptest-0.8.0-cp311-cp311-macosx_11_0_arm64.whl
+```
+
+### Building from source
+
+If you have a C/C++ compiler available it is advised to install without
+the wheel as this enables architecture specific optimisations.
+
+```bash
+    pip install diptest --no-binary diptest
+```
+
+Compatible compilers through Pybind11:
+
+- Clang/LLVM 3.3 or newer (for Apple Xcode's clang, this is 5.0.0 or newer)
+- GCC 4.8 or newer
+- Microsoft Visual Studio 2015 Update 3 or newer
+- Intel classic C++ compiler 18 or newer (ICC 20.2 tested in CI)
+- Cygwin/GCC (previously tested on 2.5.1)
+- NVCC (CUDA 11.0 tested in CI)
+- NVIDIA PGI (20.9 tested in CI)
+
+#### Disable OpenMP
+
+To disable OpenMP use:
+
+```bash
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=OFF" pip install diptest --no-binary diptest
+```
+
+#### Debug installation
+
+To enable a debug build use:
+```bash
+    SKBUILD_CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Debug" pip install diptest --no-binary diptest
+```
+
+#### Debug printing
+
+To enable the debug print statements use:
+```bash
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_DEBUG=ON" pip install diptest --no-binary diptest
+```
+then call the function with debug argument set to a value greater than zero:
+```python3
+    diptest(x, debug=1)
 ```
 
 ## References
