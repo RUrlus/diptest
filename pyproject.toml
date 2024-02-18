@@ -32,6 +32,7 @@ sdist.include = [
 ]
 
 [tool.scikit-build.cmake.define]
+CMAKE_OSX_DEPLOYMENT_TARGET = "10.13"
 DIPTEST_CPP_STANDARD = "11"
 DIPTEST_ENABLE_DEVMODE = false
 DIPTEST_ENABLE_DEBUG = false
@@ -49,11 +50,27 @@ testpaths = ["tests"]
 
 
 [tool.cibuildwheel]
-test-command = "pytest {project}/tests"
 test-extras = ["test"]
-test-skip = ["*universal2:arm64"]
+
+archs = ["auto64"]
+skip = ["*-win32", "*-manylinux_i686", "*-musllinux_x86_64"]
+build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*", "cp312-*"]
+
+# make sure to build generic wheels
+environment = { CMAKE_ARGS = "-DDIPTEST_ENABLE_ARCH_FLAGS=OFF" }
+
+# Run pytest to ensure that the package was correctly built
+test-command = "pytest {project}/tests"
+test-requires = "pytest"
+# Skip trying to test arm64 builds on Intel Macs
+test-skip = "*-macosx_arm64 *-macosx_universal2:arm64"
+
+# Necessary to see build output from the actual compilation
 build-verbosity = 1
 
+[tool.cibuildwheel.macos]
+archs = ["x86_64", "arm64"]
+environment = { MACOSX_DEPLOYMENT_TARGET = "10.13", CMAKE_ARGS = "-DDIPTEST_ENABLE_ARCH_FLAGS=OFF" }
 
 [tool.ruff]
 src = ["src"]
