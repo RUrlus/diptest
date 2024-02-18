@@ -5,11 +5,11 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "diptest"
-version = "0.7.0"
+version = "0.8.0dev0"
 description = "Hartigan's diptest."
 readme = "README.md"
 authors = [{ name = "Ralph Urlus", email = "rurlus.dev@email.com" }]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = { text = "GPLv2+" }
 
 dependencies = ["psutil", "numpy>=1.18"]
