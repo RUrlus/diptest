@@ -1,5 +1,18 @@
 # Diptest Changelog
 
+## v0.8.0 -- April 2024
+
+* CHG: [C++] Use the cheap-multiplier variant of the PCG64DXSM by @RUrlus in https://github.com/RUrlus/diptest/pull/46
+* BLD: [C++] Replace outdated architecture flag script and build-out CMake files by @RUrlus in https://github.com/RUrlus/diptest/pull/47
+* BLD: Vendor OpenMP binary in wheel by @RUrlus in https://github.com/RUrlus/diptest/pull/39
+
+### CICD
+
+* Bump actions/setup-python from 3 to 5 by @dependabot in https://github.com/RUrlus/diptest/pull/41
+* Bump pypa/cibuildwheel from 2.16.2 to 2.16.5 by @dependabot in https://github.com/RUrlus/diptest/pull/40
+* Bump pypa/gh-action-pypi-publish from 1.8.11 to 1.8.14 by @dependabot in https://github.com/RUrlus/diptest/pull/43
+* Bump pypa/cibuildwheel from 2.16.5 to 2.17.0 by @dependabot in https://github.com/RUrlus/diptest/pull/44
+
 ## v0.7.0 -- December 2023
 
 * ENH: Add support for Python 3.12 by @rurlus
