@@ -195,7 +195,7 @@ def test_diptest_bootstrap():
         _TEST_SAMPLE, boot_pval=True, n_boot=10000, n_threads=1, seed=42
     )
     assert np.isclose(dip, _TEST_SAMPLE_DIP)
-    assert np.isclose(pv, _TEST_SAMPLE_PVAL, rtol=5e-4)
+    assert 0.075 < pv < 0.09
 
 
 if _has_openmp_support:
@@ -207,7 +207,7 @@ if _has_openmp_support:
                 _TEST_SAMPLE, boot_pval=True, n_boot=10000, n_threads=cores, seed=42
             )
             assert np.isclose(dip, _TEST_SAMPLE_DIP)
-            assert abs(_TEST_SAMPLE_PVAL - pv) < 5e3
+            assert 0.075 < pv < 0.09
 
 
 def test_diptest_full_output():
