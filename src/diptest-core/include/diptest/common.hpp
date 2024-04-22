@@ -32,7 +32,7 @@ typedef SSIZE_T ssize_t;
 namespace diptest {
 namespace details {
 
-typedef pcg_engines::setseq_dxsm_128_64 pcg64_dxsm;
+typedef pcg_engines::cm_setseq_dxsm_128_64 pcg64_dxsm;
 typedef pcg_extras::seed_seq_from<std::random_device> pcg_seed_seq;
 
 }  // namespace details
