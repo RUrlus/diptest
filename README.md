@@ -104,7 +104,7 @@ Compatible compilers through Pybind11:
 To disable OpenMP use:
 
 ```bash
-    SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_OPENMP=OFF" pip install diptest --no-binary diptest
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_DISABLE_OPENMP=ON" pip install diptest --no-binary diptest
 ```
 
 #### Debug installation
