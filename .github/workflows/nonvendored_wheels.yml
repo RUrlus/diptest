@@ -76,3 +76,34 @@ jobs:
       with:
         name: artifact-${{ matrix.os }}
         path: wheelhouse/*.whl
+
+  github-release:
+    name: Create github release
+    needs: [build_sdist, build_wheels]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    
+    permissions:
+      contents: write  # IMPORTANT: mandatory for making GitHub Releases
+      id-token: write  # IMPORTANT: mandatory for sigstore
+    
+    steps:
+    - name: Download all the dists
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: artifact-*
+        merge-multiple: true
+        path: dist
+    - name: Sign the dists with Sigstore
+      uses: sigstore/gh-action-sigstore-python@v1.2.3
+      with:
+        inputs: >-
+          ./dist/*.tar.gz
+          ./dist/*.whl
+    - name: Upload artifact signatures to GitHub Release
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: >-
+        gh release upload
+        '${{ github.ref_name }}' dist/**
+        --repo '${{ github.repository }}'
