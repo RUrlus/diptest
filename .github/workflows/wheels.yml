@@ -125,11 +125,14 @@ jobs:
         name: artifact-macos-arm
         path: wheelhouse/*.whl
 
-  upload_all:
-    name: Upload if release
+  pypi-publish:
+    name: Publish release on PyPi
     needs: [build_sdist, build_wheels, build_arm_wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+    environment: release
+    permissions:
+      id-token: write
 
     steps:
     - uses: actions/setup-python@v5
@@ -143,5 +146,3 @@ jobs:
     - uses: pypa/gh-action-pypi-publish@v1.8.14
       with:
         skip_existing: true
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
