@@ -125,9 +125,29 @@ jobs:
         name: artifact-macos-arm
         path: wheelhouse/*.whl
 
+  publish-to-testpypi:
+    name: Publish release on TestPyPi
+    needs: [build_sdist, build_wheels, build_arm_wheels]
+    runs-on: ubuntu-latest
+    environment: testrelease
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    steps:
+    - uses: actions/setup-python@v5
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: artifact-*
+        merge-multiple: true
+        path: dist
+
+    - uses: pypa/gh-action-pypi-publish@v1.8.14
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
   pypi-publish:
     name: Publish release on PyPi
-    needs: [build_sdist, build_wheels, build_arm_wheels]
+    needs: [build_sdist, build_wheels, build_arm_wheels, publish-to-testpypi]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     environment: release
