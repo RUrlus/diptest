@@ -1,5 +1,9 @@
 # Diptest Changelog
 
+## v0.8.1 -- August 2024
+
+* PKG: Suppress error when two version of OpenMP are loaded
+
 ## v0.8.0 -- April 2024
 
 * CHG: [C++] Use the cheap-multiplier variant of the PCG64DXSM by @RUrlus in https://github.com/RUrlus/diptest/pull/46
