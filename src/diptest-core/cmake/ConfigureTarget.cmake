@@ -7,6 +7,78 @@ set_property(TARGET _diptest_core PROPERTY POSITION_INDEPENDENT_CODE ON)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(_diptest_core PUBLIC OpenMP::OpenMP_CXX)
     target_compile_definitions(_diptest_core PRIVATE DIPTEST_HAS_OPENMP_SUPPORT=TRUE)
+    if(APPLE)
+        # Modified implementation from LightGBM written by JamesLamb
+        # see https://github.com/microsoft/LightGBM/pull/6391
+        # store path to libomp found at build time in a variable
+        get_target_property(
+        OpenMP_LIBRARY_LOCATION
+        OpenMP::OpenMP_CXX
+        INTERFACE_LINK_LIBRARIES
+      )
+        # get just the filename of that path
+        # (to deal with the possibility that it might be 'libomp.dylib' or 'libgomp.dylib' or 'libiomp.dylib')
+        get_filename_component(
+        OpenMP_LIBRARY_NAME
+        ${OpenMP_LIBRARY_LOCATION}
+        NAME
+      )
+        # get directory of that path
+        get_filename_component(
+        OpenMP_LIBRARY_DIR
+        ${OpenMP_LIBRARY_LOCATION}
+        DIRECTORY
+      )
+
+        # Override the absolute path to OpenMP with a relative one using @rpath.
+        #
+        # This also ensures that if a libomp.dylib has already been loaded, it'll just use that.
+        add_custom_command(
+        TARGET _diptest_core
+        POST_BUILD
+          COMMAND
+            install_name_tool
+            -change
+            ${OpenMP_LIBRARY_LOCATION}
+            "@rpath/${OpenMP_LIBRARY_NAME}"
+            $<TARGET_FILE:_diptest_core>
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+          COMMENT "Replacing hard-coded OpenMP install_name with '@rpath/${OpenMP_LIBRARY_NAME}'..."
+      )
+        if (DIPTEST_VENDOR_OPENMP)
+            set(OpenMP_target_location ${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}/.dylibs/${OpenMP_LIBRARY_NAME})
+
+            message(STATUS "Copying ${OpenMP_LIBRARY_NAME} to ${OpenMP_target_location}")
+            add_custom_command(
+          TARGET _diptest_core
+          POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy
+          ${OpenMP_LIBRARY_LOCATION}
+          ${OpenMP_target_location}
+      )
+            # add RPATH entries to ensure the loader looks in the following, in the following order:
+            #   - @loader_path/../.dylibs/     the dylib we're shipping alongside
+            set_target_properties(
+          _diptest_core
+          PROPERTIES
+            BUILD_WITH_INSTALL_RPATH TRUE
+            INSTALL_RPATH "@loader_path/../.dylibs/"
+            INSTALL_RPATH_USE_LINK_PATH FALSE
+        )
+        else()
+            # add RPATH entries to ensure the loader looks in the following, in the following order:
+            #   - ${OpenMP_LIBRARY_DIR}        (wherever find_package(OpenMP) found OpenMP at build time)
+            #   - /opt/homebrew/opt/libomp/lib (where 'brew install' / 'brew link' puts libomp.dylib)
+            set_target_properties(
+          _diptest_core
+          PROPERTIES
+            BUILD_WITH_INSTALL_RPATH TRUE
+            INSTALL_RPATH "${OpenMP_LIBRARY_DIR};/opt/homebrew/opt/libomp/lib"
+            INSTALL_RPATH_USE_LINK_PATH FALSE
+        )
+
+        endif()
+    endif()
 endif()
 
 if(DIPTEST_ENABLE_DEBUG)
