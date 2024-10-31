@@ -82,18 +82,18 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 if(DIPTEST_ENABLE_DEBUG)
-  message(STATUS "diptest: Building with debug support")
-  target_compile_definitions(_diptest_core PRIVATE DIPTEST_DEBUG=TRUE)
+    message(STATUS "diptest: Building with debug support")
+    target_compile_definitions(_diptest_core PRIVATE DIPTEST_DEBUG=TRUE)
 endif()
 
 if(DIPTEST_ENABLE_DEVMODE)
-  target_compile_options(_diptest_core PRIVATE ${DIPTEST_DEVMODE_OPTIONS})
+    target_compile_options(_diptest_core PRIVATE ${DIPTEST_DEVMODE_OPTIONS})
 endif()
 
 if(DIPTEST_ASAN_BUILD)
-  target_compile_options(_diptest_core PRIVATE -fsanitize=address
+    target_compile_options(_diptest_core PRIVATE -fsanitize=address
                                                -fno-omit-frame-pointer)
-  target_link_options(_diptest_core PRIVATE -fsanitize=address
+    target_link_options(_diptest_core PRIVATE -fsanitize=address
                       -fno-omit-frame-pointer -shared-libasan)
 endif()
 
