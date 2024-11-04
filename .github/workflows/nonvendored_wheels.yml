@@ -62,6 +62,7 @@ jobs:
       env:
         CIBW_ENVIRONMENT: CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=OFF"
         CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="12.0" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=OFF"
+        CIBW_REPAIR_WHEEL_COMMAND_MACOS: "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
     - name: Show files
       run: ls -lh wheelhouse
