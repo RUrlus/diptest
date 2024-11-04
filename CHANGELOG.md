@@ -1,5 +1,9 @@
 # Diptest Changelog
 
+## v0.8.2 -- November 2024
+
+* BLD: Set relative path for vendored libomp on MacOS
+
 ## v0.8.1 -- August 2024
 
 * PKG: Suppress error when two version of OpenMP are loaded
