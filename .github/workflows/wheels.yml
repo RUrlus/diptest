@@ -90,7 +90,7 @@ jobs:
         CIBW_TEST_COMMAND: pytest {project}/tests && python -c "from diptest import _has_openmp_support; assert _has_openmp_support"
         # only build for arm; x86_64 wheels are build seperately
         CIBW_ARCHS_MACOS: "arm64"
-        CIBW_ENVIRONMENT_MACOS: PATH="$HOME/.local/:$PATH" MACOSX_DEPLOYMENT_TARGET="12.0" DYLD_LIBRARY_PATH="$HOME/.local/libomp/lib" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=$HOME/.local/libomp"
+        CIBW_ENVIRONMENT_MACOS: PATH="$HOME/.local/:$PATH" MACOSX_DEPLOYMENT_TARGET="12.0" DYLD_LIBRARY_PATH="$HOME/.local/libomp/lib" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON -DDIPTEST_VENDOR_OPENMP=ON -DOpenMP_ROOT=$HOME/.local/libomp"
 
     - name: Verify clean directory
       run: git diff --exit-code
@@ -145,7 +145,7 @@ jobs:
       env:
         # only build for x86_64, arm wheels are build seperately
         CIBW_ARCHS: "x86_64"
-        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="12.0" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=/usr/local"
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="12.0" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_VENDOR_OPENMP=ON -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=/usr/local"
 
     - name: Verify clean directory
       run: git diff --exit-code
