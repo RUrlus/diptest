@@ -41,8 +41,8 @@ jobs:
         - {
             name: "Ubuntu (GCC-11)",
             build_type: "Release",
-            cc: "gcc-11",
-            cxx: "g++-11",
+            cc: "gcc-14",
+            cxx: "g++-14",
             generators: "Ninja",
             target: "all"
           }
