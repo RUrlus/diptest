@@ -53,7 +53,7 @@ jobs:
 
       - name: Install python package
         run: |
-          SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON -DDIPTEST_ENABLE_OPENMP=ON" python -m pip install -e . -v
+          SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_CXX=clang++-16" python -m pip install -e . -v
           
       - name: Configure
         run: |
