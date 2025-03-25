@@ -43,7 +43,7 @@ def dipstat(
         if False x is assumed to already be sorted in ascending order
     debug : int, default=0
         0 <= debug <= 3, print debugging messages, is ignored unless
-        the pacakge was installed in debug mode
+        the package was installed in debug mode
 
     Returns
     -------
@@ -68,7 +68,7 @@ def dipstat(
         x = np.sort(x)
     elif not isinstance(x, np.ndarray):
         x = np.asarray(x, order="C")
-    elif not (x.flags.c_contiguous or x.flags.c_contiguous):
+    elif not (x.flags.c_contiguous or x.flags.f_contiguous):
         x = np.copy(x, order="C")
 
     if (x.ndim > 1) and not ((x.shape[1] == 1) or (x.shape[0] == 1)):
