@@ -1,8 +1,24 @@
 # Diptest Changelog
 
+## 0.8.3 -- March 2025
+
+### Fixes
+
+* FIX: Resolve negative dip statistic values due to overflow by @RUrlus in https://github.com/RUrlus/diptest/pull/69
+* FIX: Correct flag check for contiguous memory layout by @RUrlus in https://github.com/RUrlus/diptest/pull/69
+
+### CICD
+
+* CICD: Bump Clang and GCC versions by @RUrlus in https://github.com/RUrlus/diptest/pull/67
+* CICD: Bump pypa/cibuildwheel from 2.20.0 to 2.21.0 by @dependabot in https://github.com/RUrlus/diptest/pull/59
+* CICD: Bump pypa/cibuildwheel from 2.21.0 to 2.21.1 by @dependabot in https://github.com/RUrlus/diptest/pull/60
+* CICD: Bump pypa/cibuildwheel from 2.21.1 to 2.21.2 by @dependabot in https://github.com/RUrlus/diptest/pull/61
+* CICD: Bump pypa/cibuildwheel from 2.21.3 to 2.22.0 by @dependabot in https://github.com/RUrlus/diptest/pull/64
+* CICD: Bump pypa/cibuildwheel from 2.22.0 to 2.23.1 by @dependabot in https://github.com/RUrlus/diptest/pull/66
+
 ## v0.8.2 -- November 2024
 
-* BLD: Set relative path for vendored libomp on MacOS
+* BLD: use relative path for libomp by @RUrlus in https://github.com/RUrlus/diptest/pull/63
 
 ## v0.8.1 -- August 2024
 
