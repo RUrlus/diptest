@@ -503,7 +503,7 @@ double diptst(
         if (d < dip)
             goto L_END;
 
-            // Calculate the DIPs for the current LOW and HIGH
+        // Calculate the DIPs for the current LOW and HIGH
 #if defined(DIPTEST_DEBUG)
         if (debug)
             cout << "'dip': MAIN-CALCULATION" << endl;
@@ -553,7 +553,9 @@ L_END:
      * M. Maechler -- speedup: Work with (2n * dip) everywhere but the very end!
      * It saves many divisions by n!
      */
-    dip /= (2 * n);
+    // cast n to 64bit in case it overflows in the multiplication
+    // TODO(ru)  add settable index size
+    dip /= static_cast<double>(2 * static_cast<int64_t>(n));
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
     return dip;
