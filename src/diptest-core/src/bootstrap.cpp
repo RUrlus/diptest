@@ -1,11 +1,12 @@
 /* wrapper.cpp -- implementation of wrapper around diptst from diptest.c
  * Copyright 2022 R. Urlus
  */
-#include <diptest/bootstrap.hpp>
 #include <functional>
 #include <memory>
 #include <queue>
 #include <vector>
+
+#include <diptest/bootstrap.hpp>
 
 namespace py = pybind11;
 
@@ -18,7 +19,8 @@ double diptest_pval(
     int allow_zero,
     int debug,
     uint64_t seed,
-    uint64_t stream) {
+    uint64_t stream
+) {
     details::pcg64_dxsm rng;
     if (seed == 0) {
         details::pcg_seed_seq seed_source;
@@ -30,12 +32,12 @@ double diptest_pval(
     }
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    std::array<int, 4> lo_hi = {0, 0, 0, 0};
-    std::unique_ptr<int[]> gcm(new int[n]);
-    std::unique_ptr<int[]> lcm(new int[n]);
-    std::unique_ptr<int[]> mn(new int[n]);
-    std::unique_ptr<int[]> mj(new int[n]);
-    std::unique_ptr<int[]> dips(new int[n_boot]);
+    std::array<int_vt, 4> lo_hi = {0, 0, 0, 0};
+    std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
+    std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
+    std::unique_ptr<int_vt[]> mn(new int_vt[n]);
+    std::unique_ptr<int_vt[]> mj(new int_vt[n]);
+    std::unique_ptr<int_vt[]> dips(new int_vt[n_boot]);
     std::unique_ptr<double[]> sample(new double[n]);
 
     double* r_sample = sample.get();
@@ -55,12 +57,14 @@ double diptest_pval(
             mn.get(),
             mj.get(),
             allow_zero,
-            debug);
+            debug
+        );
         dips[i] = dipstat <= dip;
     }
     int64_t accu = 0;
     double p_val = static_cast<double>(
-                       std::accumulate(dips.get(), dips.get() + n_boot, accu))
+                       std::accumulate(dips.get(), dips.get() + n_boot, accu)
+                   )
                    / n_boot;
     return p_val;
 }  // diptest_pval
@@ -73,7 +77,8 @@ double diptest_pval_mt(
     int allow_zero,
     int debug,
     uint64_t seed,
-    size_t n_threads) {
+    size_t n_threads
+) {
     std::unique_ptr<bool[]> dips(new bool[n_boot]);
     details::pcg64_dxsm global_rng;
     if (seed == 0) {
@@ -85,12 +90,12 @@ double diptest_pval_mt(
 
 #pragma omp parallel num_threads(n_threads) shared(dips, global_rng)
     {
-        std::unique_ptr<int[]> lo_hi(new int[n]);
+        std::unique_ptr<int_vt[]> lo_hi(new int_vt[n]);
         std::memset(lo_hi.get(), 0, 4);
-        std::unique_ptr<int[]> gcm(new int[n]);
-        std::unique_ptr<int[]> lcm(new int[n]);
-        std::unique_ptr<int[]> mn(new int[n]);
-        std::unique_ptr<int[]> mj(new int[n]);
+        std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
+        std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
+        std::unique_ptr<int_vt[]> mn(new int_vt[n]);
+        std::unique_ptr<int_vt[]> mj(new int_vt[n]);
         std::unique_ptr<double[]> sample(new double[n]);
 
         double* p_sample = sample.get();
@@ -121,12 +126,14 @@ double diptest_pval_mt(
                           mn.get(),
                           mj.get(),
                           allow_zero,
-                          debug);
+                          debug
+                      );
         }
     }  // pragma parallel
     int64_t accu = 0;
     double p_val = static_cast<double>(
-                       std::accumulate(dips.get(), dips.get() + n_boot, accu))
+                       std::accumulate(dips.get(), dips.get() + n_boot, accu)
+                   )
                    / n_boot;
     return p_val;
 }  // diptest_pval_mt
@@ -144,7 +151,8 @@ void bind_diptest_pval(py::module& m) {
         py::arg("allow_zero") = 1,
         py::arg("debug") = 0,
         py::arg("seed") = 0,
-        py::arg("stream") = 0);
+        py::arg("stream") = 0
+    );
 }
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
@@ -158,7 +166,8 @@ void bind_diptest_pval_mt(py::module& m) {
         py::arg("allow_zero") = 1,
         py::arg("debug") = 0,
         py::arg("seed") = 0,
-        py::arg("n_threads") = 4);
+        py::arg("n_threads") = 4
+    );
 }
 #endif
 

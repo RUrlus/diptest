@@ -16,7 +16,9 @@ namespace py = pybind11;
 namespace diptest {
 
 namespace details {
-double diptest(const double* x_ptr, int N, int allow_zero = 1, int debug = 0);
+double diptest(
+    const double* x_ptr, int_vt N, int allow_zero = 1, int debug = 0
+);
 }  // namespace details
 
 double diptest(const py::array_t<double>& x, int allow_zero, int debug);

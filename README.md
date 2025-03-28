@@ -99,6 +99,14 @@ Compatible compilers through Pybind11:
 - NVCC (CUDA 11.0 tested in CI)
 - NVIDIA PGI (20.9 tested in CI)
 
+#### 64bit index
+
+In case you work with very large sample sizes you can use 64bit indexes.
+
+```bash
+    SKBUILD_CMAKE_ARGS="-DDIPTEST_64BIT_index=ON" pip install diptest --no-binary diptest
+```
+
 #### Disable OpenMP
 
 To disable OpenMP use:

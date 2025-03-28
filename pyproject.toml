@@ -39,6 +39,7 @@ DIPTEST_ENABLE_DEBUG = false
 DIPTEST_ENABLE_OPENMP = false
 DIPTEST_ENABLE_EXT_TESTS = false
 DIPTEST_ENABLE_ARCH_FLAGS = true
+DIPTEST_ENABLE_64BIT_INDEX = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"

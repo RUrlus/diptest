@@ -8,6 +8,7 @@ cmake -S . -G Ninja -B build \
     -DDIPTEST_ENABLE_OPENMP=ON \
     -DDIPTEST_ENABLE_EXT_TESTS=OFF \
     -DDIPTEST_ENABLE_ARCH_FLAGS=ON \
+    -DDIPTEST_ENABLE_64BIT_INDEX=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DOpenMP_ROOT=$(brew --prefix)/opt/libomp \
     -Dpybind11_DIR=$(python3 -c "import pybind11; print(pybind11.get_cmake_dir())") \
