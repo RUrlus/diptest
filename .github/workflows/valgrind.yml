@@ -53,7 +53,7 @@ jobs:
 
       - name: Install python package
         run: |
-          SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON" python -m pip install -e . -v
+          CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON" python -m pip install -e . -v
 
       - name: Configure
         run: |

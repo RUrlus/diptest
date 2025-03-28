@@ -96,7 +96,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           python -m pip install pip --upgrade
-          SKBUILD_CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON -DDIPTEST_ENABLE_64BIT_INDEX=${{matrix.config.large_index}}" pip install ".[test]" -v
+          CMAKE_ARGS="-DDIPTEST_ENABLE_EXT_TESTS=ON -DDIPTEST_ENABLE_64BIT_INDEX=${{matrix.config.large_index}}" pip install ".[test]" -v
 
       - name: Install
         if: runner.os != 'Linux'
