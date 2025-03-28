@@ -1,5 +1,11 @@
 # Diptest Changelog
 
+## 0.9.0 -- April 2025
+
+### Features
+
+* FEAT: Offer compile-time option to use 64bit indexes
+
 ## 0.8.3 -- March 2025
 
 ### Fixes
