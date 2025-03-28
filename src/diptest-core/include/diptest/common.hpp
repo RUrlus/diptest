@@ -29,6 +29,12 @@ typedef SSIZE_T ssize_t;
 #include <pcg_extras.hpp>
 #include <pcg_random.hpp>
 
+#if defined(DIPTEST_64BIT_INDEX)
+using int_vt = int64_t;
+#else
+using int_vt = int32_t;
+#endif
+
 namespace diptest {
 namespace details {
 

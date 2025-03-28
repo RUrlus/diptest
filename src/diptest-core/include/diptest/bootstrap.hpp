@@ -32,7 +32,8 @@ double diptest_pval(
     int allow_zero,
     int debug,
     uint64_t seed,
-    uint64_t stream = 0);
+    uint64_t stream = 0
+);
 
 double diptest_pval_mt(
     const double dipstat,

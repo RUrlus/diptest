@@ -81,6 +81,13 @@ if(OpenMP_CXX_FOUND)
     endif()
 endif()
 
+if(DIPTEST_ENABLE_64BIT_INDEX)
+    message(STATUS "diptest: Building with 64bit index")
+    target_compile_definitions(_diptest_core PRIVATE DIPTEST_64BIT_INDEX=TRUE)
+else()
+    message(STATUS "diptest: Building with 32bit index")
+endif()
+
 if(DIPTEST_ENABLE_DEBUG)
     message(STATUS "diptest: Building with debug support")
     target_compile_definitions(_diptest_core PRIVATE DIPTEST_DEBUG=TRUE)

@@ -72,6 +72,13 @@
 #include <iostream>  // for cout
 #include <iterator>  // for iterators
 #include <vector>    // for vectors
+//
+
+#if defined(DIPTEST_64BIT_INDEX)
+using int_vt = int64_t;
+#else
+using int_vt = int32_t;
+#endif
 
 /**
  * @brief Enumerates the distinct types of functions that will be calculated
@@ -93,11 +100,11 @@ enum ConvexEnvelopeType { MAJORANT, MINORANT };
 class Dip {
  public:
     double val;
-    int idx;
+    int_vt idx;
 
     // Constructors:
 
-    Dip(double val, int idx) : val(val), idx(idx) {}
+    Dip(double val, int_vt idx) : val(val), idx(idx) {}
 
     /**
      * @brief Construct a new Dip object
@@ -115,7 +122,7 @@ class Dip {
      * @param value the value that the stored value will be compared against
      * @param index the index that the dip value is reported
      */
-    void maybe_update(double value, int index);
+    void maybe_update(double value, int_vt index);
 
     /**
      * @brief An update operation that makes the two instances to have the same
@@ -128,7 +135,7 @@ class Dip {
     void maybe_update(const Dip& other);
 };
 
-inline void Dip::maybe_update(double value, int index) {
+inline void Dip::maybe_update(double value, int_vt index) {
     if (val < value) {
         val = value;
         idx = index;
@@ -157,18 +164,18 @@ inline void Dip::maybe_update(const Dip& other) {
 class ConvexEnvelope {
  public:
     const double* arr;
-    int *optimum, *indices;
-    const int size;
+    int_vt *optimum, *indices;
+    const int_vt size;
     const ConvexEnvelopeType type;
-    int rel_length = -1, x = -1, y = -1;
+    int_vt rel_length = -1, x = -1, y = -1;
 
     // Constructors:
 
     ConvexEnvelope(
         const double* arr,
-        int* optimum,
-        int* indices,
-        int size,
+        int_vt* optimum,
+        int_vt* indices,
+        int_vt size,
         ConvexEnvelopeType type
     )
         : arr(arr),
@@ -185,18 +192,18 @@ class ConvexEnvelope {
      *
      */
     void compute_indices() {
-        const int offset = (type == MINORANT) ? +1 : -1;
-        const int start = (type == MINORANT) ? 1 : size;
-        const int end = size + 1 - start;
+        const int_vt offset = (type == MINORANT) ? +1 : -1;
+        const int_vt start = (type == MINORANT) ? 1 : size;
+        const int_vt end = size + 1 - start;
 
         indices[start] = start;
 
-        for (int i = start + offset; offset * (end - i) >= 0; i += offset) {
+        for (int_vt i = start + offset; offset * (end - i) >= 0; i += offset) {
             indices[i] = i - offset;
 
             while (true) {
-                int ind_at_i = indices[i];
-                int ind_at_i_iter = indices[ind_at_i];
+                int_vt ind_at_i = indices[i];
+                int_vt ind_at_i_iter = indices[ind_at_i];
 
                 /**
                  * We compare the rate of change of arr, i.e.,
@@ -221,19 +228,20 @@ class ConvexEnvelope {
      * the array
      */
     Dip compute_dip() {
-        const int offset = (type == MINORANT) ? 0 : 1;
-        const int sign = 1 + -2 * offset;
+        const int_vt offset = (type == MINORANT) ? 0 : 1;
+        const int_vt sign = 1 + -2 * offset;
 
         Dip ret_dip(0., -1);
         Dip tmp_dip(1., -1);
 
-        for (int j = x; j < rel_length; ++j) {
-            int j_start = optimum[j + 1 - offset], j_end = optimum[j + offset];
+        for (int_vt j = x; j < rel_length; ++j) {
+            int_vt j_start = optimum[j + 1 - offset],
+                   j_end = optimum[j + offset];
 
             if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
                 double C = (j_end - j_start) / (arr[j_end] - arr[j_start]);
 
-                for (int jj = j_start; jj <= j_end; ++jj) {
+                for (int_vt jj = j_start; jj <= j_end; ++jj) {
                     double d = sign
                                * ((jj - j_start + sign)
                                   - (arr[jj] - arr[j_start]) * C);
@@ -261,7 +269,7 @@ class ConvexEnvelope {
  * @return the maximum distance
  */
 inline double max_distance(
-    ConvexEnvelope& gcm, ConvexEnvelope& lcm, int debug
+    ConvexEnvelope& gcm, ConvexEnvelope& lcm, int_vt debug
 ) {
 #ifndef DDIPTEST_ENABLE_DEBUG
     UNUSED(debug);
@@ -273,13 +281,13 @@ inline double max_distance(
     long double ret_d = 0.;
 
     do {
-        int gcm_y = gcm.optimum[gcm.y], lcm_y = lcm.optimum[lcm.y];
-        int is_maj = gcm_y > lcm_y;
-        int i = is_maj * gcm_y + (1 - is_maj) * lcm_y;
-        int j = is_maj * lcm_y + (1 - is_maj) * gcm_y;
-        int i1 = is_maj * (gcm.optimum[gcm.y + 1])
-                 + (1 - is_maj) * (lcm.optimum[lcm.y - 1]);
-        int sign = 2 * is_maj - 1;
+        int_vt gcm_y = gcm.optimum[gcm.y], lcm_y = lcm.optimum[lcm.y];
+        int_vt is_maj = gcm_y > lcm_y;
+        int_vt i = is_maj * gcm_y + (1 - is_maj) * lcm_y;
+        int_vt j = is_maj * lcm_y + (1 - is_maj) * gcm_y;
+        int_vt i1 = is_maj * (gcm.optimum[gcm.y + 1])
+                    + (1 - is_maj) * (lcm.optimum[lcm.y - 1]);
+        int_vt sign = 2 * is_maj - 1;
 
         long double dx = sign
                          * ((j - i1 + sign)
@@ -343,12 +351,12 @@ inline double max_distance(
 template <bool check>
 double diptst(
     const double x[],
-    const int n,
-    int* lo_hi,
-    int* gcm,
-    int* lcm,
-    int* mn,
-    int* mj,
+    const int_vt n,
+    int_vt* lo_hi,
+    int_vt* gcm,
+    int_vt* lcm,
+    int_vt* mn,
+    int_vt* mj,
     const int min_is_0,
     const int debug
 ) {
@@ -366,7 +374,7 @@ double diptst(
     long double d = 0.;  // TODO: check if this makes 32/64-bit differences go
     double dip = (min_is_0) ? 0. : 1.;
     Dip dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
-    int i;
+    int_vt i;
     bool flag;
 
     /**
@@ -555,7 +563,11 @@ L_END:
      */
     // cast n to 64bit in case it overflows in the multiplication
     // TODO(ru)  add settable index size
+#ifdef DIPTEST_64BIT_INDEX
+    dip /= static_cast<double>(2 * n);
+#else
     dip /= static_cast<double>(2 * static_cast<int64_t>(n));
+#endif
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
     return dip;
