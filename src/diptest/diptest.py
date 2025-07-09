@@ -58,6 +58,7 @@ def dipstat(
             xu:     upper end of modal interval
             gcm:    (last-used) indices of the greatest concave majorant
             lcm:    (last-used) indices of the least concave majorant
+            dipidx: index of the dip
 
     Reference
     -----------
@@ -153,6 +154,7 @@ def diptest(
             xu:     upper end of modal interval
             gcm:    (last-used) indices of the greatest concave majorant
             lcm:    (last-used) indices of the least concave majorant
+            dipidx: index of the dip
 
     Reference:
     -----------

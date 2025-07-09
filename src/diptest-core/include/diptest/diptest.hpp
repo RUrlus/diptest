@@ -335,6 +335,7 @@ inline double max_distance(
  * @param[in] n the size of the array
  * @param[out] lo_hi an array of size 4 that is used to return the lower and the
  * upper end of the model interval, and the relative lengths of gcm and lcm
+ * @param[out] dipidx index of the dip
  * @param[out] ifault an error integer. A value of 1 indicates that n is non-
  * positive. A value of 2 indicates that the array x was not sorted
  * @param gcm[out] the greatest convex minorant
@@ -353,6 +354,7 @@ double diptst(
     const double x[],
     const int_vt n,
     int_vt* lo_hi,
+    int_vt* dipidx,
     int_vt* gcm,
     int_vt* lcm,
     int_vt* mn,
@@ -381,6 +383,7 @@ double diptst(
      *  Parameter adjustments, so that array referencing starts at 1,
      *  i.e., x[1]..x[n]
      */
+    --dipidx;
     --mj;
     --mn;
     --lcm;
@@ -570,6 +573,7 @@ L_END:
 #endif
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
+    *(dipidx + 1) = tmp_dip.idx;
     return dip;
 }  // diptst
 #undef low
