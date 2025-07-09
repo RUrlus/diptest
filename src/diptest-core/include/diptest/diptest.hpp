@@ -335,6 +335,7 @@ inline double max_distance(
  * @param[in] n the size of the array
  * @param[out] lo_hi an array of size 4 that is used to return the lower and the
  * upper end of the model interval, and the relative lengths of gcm and lcm
+ * @param[out] dipidx index of the dip
  * @param[out] ifault an error integer. A value of 1 indicates that n is non-
  * positive. A value of 2 indicates that the array x was not sorted
  * @param gcm[out] the greatest convex minorant
