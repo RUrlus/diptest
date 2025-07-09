@@ -353,6 +353,7 @@ double diptst(
     const double x[],
     const int_vt n,
     int_vt* lo_hi,
+    int_vt* dipidx,
     int_vt* gcm,
     int_vt* lcm,
     int_vt* mn,
@@ -381,6 +382,7 @@ double diptst(
      *  Parameter adjustments, so that array referencing starts at 1,
      *  i.e., x[1]..x[n]
      */
+    --dipidx;
     --mj;
     --mn;
     --lcm;
@@ -570,6 +572,7 @@ L_END:
 #endif
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
+    *(dipidx + 1) = tmp_dip.idx;
     return dip;
 }  // diptst
 #undef low
