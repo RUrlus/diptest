@@ -12,6 +12,7 @@ inline double diptest(
     const double* x_ptr, int_vt N, int allow_zero, int debug
 ) {
     std::array<int_vt, 4> lo_hi = {0, 0, 0, 0};
+    std::unique_ptr<int_vt[]> dipidx(new int_vt[N]);
     std::unique_ptr<int_vt[]> gcm(new int_vt[N]);
     std::unique_ptr<int_vt[]> lcm(new int_vt[N]);
     std::unique_ptr<int_vt[]> mn(new int_vt[N]);
@@ -21,6 +22,7 @@ inline double diptest(
         x_ptr,
         N,
         lo_hi.data(),
+        dipidx.get(),
         gcm.get(),
         lcm.get(),
         mn.get(),
@@ -46,6 +48,8 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
     auto lcm = py::array_t<int_vt>(N);
     int_vt* gcm_ptr = gcm.mutable_data();
     int_vt* lcm_ptr = lcm.mutable_data();
+    auto dipidx = py::array_t<int_vt>(1);
+    int_vt* dipidx_ptr = dipidx.mutable_data();
 
     std::unique_ptr<int_vt[]> mn(new int_vt[N]);
     std::unique_ptr<int_vt[]> mj(new int_vt[N]);
@@ -56,6 +60,7 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
         x_ptr,
         N,
         lo_hi.data(),
+        dipidx_ptr,
         gcm_ptr,
         lcm_ptr,
         mn_ptr,
@@ -73,6 +78,7 @@ py::dict diptest_full(const py::array_t<double>& x, int allow_zero, int debug) {
         "dip"_a = dip,
         "lo"_a = lo,
         "hi"_a = hi,
+        "dipidx"_a = dipidx.at(0) - 1,
         "xl"_a = x.at(lo),
         "xu"_a = x.at(hi),
         "_gcm"_a = gcm,

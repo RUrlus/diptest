@@ -33,6 +33,7 @@ double diptest_pval(
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
     std::array<int_vt, 4> lo_hi = {0, 0, 0, 0};
+    std::unique_ptr<int_vt[]> dipidx(new int_vt[1]);
     std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
     std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
     std::unique_ptr<int_vt[]> mn(new int_vt[n]);
@@ -52,6 +53,7 @@ double diptest_pval(
             r_sample,
             n,
             lo_hi.data(),
+            dipidx.get(),
             gcm.get(),
             lcm.get(),
             mn.get(),
@@ -92,6 +94,7 @@ double diptest_pval_mt(
     {
         std::unique_ptr<int_vt[]> lo_hi(new int_vt[n]);
         std::memset(lo_hi.get(), 0, 4);
+        std::unique_ptr<int_vt[]> dipidx(new int_vt[1]);
         std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
         std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
         std::unique_ptr<int_vt[]> mn(new int_vt[n]);
@@ -121,6 +124,7 @@ double diptest_pval_mt(
                           p_sample,
                           n,
                           lo_hi.get(),
+                          dipidx.get(),
                           gcm.get(),
                           lcm.get(),
                           mn.get(),
