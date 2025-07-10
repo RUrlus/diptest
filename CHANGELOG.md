@@ -1,5 +1,20 @@
 # Diptest Changelog
 
+## 0.10.0 -- July 2025
+
+### Features
+
+* FEAT: Add dip index/location to full output by @JohannesBuchner  in https://github.com/RUrlus/diptest/pull/78
+
+### CICD
+
+* CICD: Bump pypa/cibuildwheel from 2.23.2 to 2.23.3 by @dependabot in https://github.com/RUrlus/diptest/pull/73
+* CICD: Bump pypa/cibuildwheel from 2.23.3 to 3.0.0 by @dependabot in https://github.com/RUrlus/diptest/pull/74
+* CICD: Bump pypa/cibuildwheel from 3.0.0 to 3.0.1 by @dependabot in https://github.com/RUrlus/diptest/pull/75
+
+**Full Changelog**: https://github.com/RUrlus/diptest/compare/v0.9.0...v0.10.0
+
+
 ## 0.9.0 -- April 2025
 
 ### Features
