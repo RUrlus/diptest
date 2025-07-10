@@ -1,10 +1,10 @@
 /* wrapper.cpp -- implementation of wrapper around diptst from diptest.c
  * Copyright 2022 R. Urlus
  */
-#include <functional>
+#include <algorithm>  // sort
 #include <memory>
-#include <queue>
-#include <vector>
+#include <numeric>  // accumulate
+#include <random>   // uniform_real_distribution
 
 #include <diptest/bootstrap.hpp>
 
@@ -32,8 +32,7 @@ double diptest_pval(
     }
     std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-    std::array<int_vt, 4> lo_hi = {0, 0, 0, 0};
-    std::unique_ptr<int_vt[]> dipidx(new int_vt[1]);
+    std::array<int_vt, 5> lo_hi = {0, 0, 0, 0, 0};
     std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
     std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
     std::unique_ptr<int_vt[]> mn(new int_vt[n]);
@@ -53,7 +52,6 @@ double diptest_pval(
             r_sample,
             n,
             lo_hi.data(),
-            dipidx.get(),
             gcm.get(),
             lcm.get(),
             mn.get(),
@@ -92,9 +90,7 @@ double diptest_pval_mt(
 
 #pragma omp parallel num_threads(n_threads) shared(dips, global_rng)
     {
-        std::unique_ptr<int_vt[]> lo_hi(new int_vt[n]);
-        std::memset(lo_hi.get(), 0, 4);
-        std::unique_ptr<int_vt[]> dipidx(new int_vt[1]);
+        std::array<int_vt, 5> lo_hi = {0, 0, 0, 0, 0};
         std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
         std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
         std::unique_ptr<int_vt[]> mn(new int_vt[n]);
@@ -123,8 +119,7 @@ double diptest_pval_mt(
             dips[i] = dipstat <= diptst<false>(
                           p_sample,
                           n,
-                          lo_hi.get(),
-                          dipidx.get(),
+                          lo_hi.data(),
                           gcm.get(),
                           lcm.get(),
                           mn.get(),

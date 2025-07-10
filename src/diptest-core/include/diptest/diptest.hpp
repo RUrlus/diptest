@@ -335,7 +335,6 @@ inline double max_distance(
  * @param[in] n the size of the array
  * @param[out] lo_hi an array of size 4 that is used to return the lower and the
  * upper end of the model interval, and the relative lengths of gcm and lcm
- * @param[out] dipidx index of the dip
  * @param[out] ifault an error integer. A value of 1 indicates that n is non-
  * positive. A value of 2 indicates that the array x was not sorted
  * @param gcm[out] the greatest convex minorant
@@ -354,7 +353,6 @@ double diptst(
     const double x[],
     const int_vt n,
     int_vt* lo_hi,
-    int_vt* dipidx,
     int_vt* gcm,
     int_vt* lcm,
     int_vt* mn,
@@ -383,7 +381,6 @@ double diptst(
      *  Parameter adjustments, so that array referencing starts at 1,
      *  i.e., x[1]..x[n]
      */
-    --dipidx;
     --mj;
     --mn;
     --lcm;
@@ -392,6 +389,8 @@ double diptst(
 
     ConvexEnvelope gcm_obj(x, gcm, mn, n, MINORANT);
     ConvexEnvelope lcm_obj(x, lcm, mj, n, MAJORANT);
+
+    int_vt dip_idx = -1;
 
     // Perform the two consistency checks:
 
@@ -540,6 +539,7 @@ double diptst(
         }
         if (dip < tmp_dip.val) {
             dip = tmp_dip.val;
+            dip_idx = tmp_dip.idx;
 #if defined(DIPTEST_DEBUG)
             if (debug)
                 cout << " --> new larger dip " << (tmp_dip.val)
@@ -564,16 +564,15 @@ L_END:
      * M. Maechler -- speedup: Work with (2n * dip) everywhere but the very end!
      * It saves many divisions by n!
      */
-    // cast n to 64bit in case it overflows in the multiplication
-    // TODO(ru)  add settable index size
 #ifdef DIPTEST_64BIT_INDEX
     dip /= static_cast<double>(2 * n);
 #else
+    // cast n to 64bit in case it overflows in the multiplication
     dip /= static_cast<double>(2 * static_cast<int64_t>(n));
 #endif
     lo_hi[2] = l_gcm;
     lo_hi[3] = l_lcm;
-    *(dipidx + 1) = tmp_dip.idx;
+    lo_hi[4] = dip_idx;
     return dip;
 }  // diptst
 #undef low

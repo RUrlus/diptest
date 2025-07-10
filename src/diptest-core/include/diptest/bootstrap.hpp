@@ -10,12 +10,7 @@
 #include <omp.h>
 #endif
 
-#include <algorithm>  // sort
-#include <cmath>      // NAN
-#include <memory>     // unique_ptr
-#include <numeric>    // accumulate
-#include <random>     // uniform_real_distribution
-#include <stdexcept>  // runtime_error
+#include <memory>  // unique_ptr
 
 #include <diptest/arena.hpp>
 #include <diptest/common.hpp>
