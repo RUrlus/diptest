@@ -302,8 +302,8 @@ inline double max_distance(
             lcm.x = lcm.y - is_maj;
 #if defined(DIPTEST_DEBUG)
             if (debug >= 2) {
-                cout << ((is_maj) ? "G" : "L") << "(" << (gcm.x) << ", "
-                     << (lcm.x) << ")";
+                std::cout << ((is_maj) ? "G" : "L") << "(" << (gcm.x) << ", "
+                          << (lcm.x) << ")";
             }
 #endif  // DIPTEST_DEBUG
         }
@@ -315,10 +315,10 @@ inline double max_distance(
 #if defined(DIPTEST_DEBUG)
         if (debug) {
             if (debug >= 2) {
-                cout << " --> (gcm.y, lcm.y) = (" << (gcm.y) << ", " << (lcm.y)
-                     << ")" << endl;
+                std::cout << " --> (gcm.y, lcm.y) = (" << (gcm.y) << ", "
+                          << (lcm.y) << ")" << std::endl;
             } else {
-                cout << ".";
+                std::cout << ".";
             }
         }
 #endif  // DIPTEST_DEBUG
@@ -376,7 +376,6 @@ double diptst(
     Dip dip_l(min_is_0), dip_u(min_is_0), tmp_dip(min_is_0);
     int_vt i;
     bool flag;
-
     /**
      *  Parameter adjustments, so that array referencing starts at 1,
      *  i.e., x[1]..x[n]
@@ -415,8 +414,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
     if (debug)
-        cout << "'dip': START: (N = " << n << ")"
-             << " and 2N*dip = " << dip << "." << endl;
+        std::cout << "'dip': START: (N = " << n << ")"
+                  << " and 2N*dip = " << dip << "." << std::endl;
 #endif  // DIPTEST_DEBUG
 
     /**
@@ -456,23 +455,23 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
         if (debug) {
-            cout << "'dip': LOOP-BEGIN: 2n*D = " << dip
-                 << " and [low, high] = [" << setw(3) << low << ", " << setw(3)
-                 << high << "]";
+            std::cout << "'dip': LOOP-BEGIN: 2n*D = " << dip
+                      << " and [low, high] = [" << std::setw(3) << low << ", "
+                      << std::setw(3) << high << "]";
             if (debug >= 3) {
                 // Print the GCM:
-                cout << " :" << endl << " gcm[1:" << l_gcm << "] = ";
+                std::cout << " :" << std::endl << " gcm[1:" << l_gcm << "] = ";
                 for (i = 1; i < l_gcm; i++)
-                    cout << gcm[i] << ", ";
-                cout << gcm[l_gcm] << endl;
+                    std::cout << gcm[i] << ", ";
+                std::cout << gcm[l_gcm] << std::endl;
                 // Print the LCM:
-                cout << " lcm[1:" << l_lcm << "] = ";
+                std::cout << " lcm[1:" << l_lcm << "] = ";
                 for (i = 1; i < l_lcm; i++)
-                    cout << lcm[i] << ", ";
-                cout << lcm[l_lcm] << endl;
+                    std::cout << lcm[i] << ", ";
+                std::cout << lcm[l_lcm] << std::endl;
             } else {  // debug <= 2
-                cout << "; (l_lcm, l_gcm) = (" << setw(2) << l_lcm << ", "
-                     << setw(2) << l_gcm << ")" << endl;
+                std::cout << "; (l_lcm, l_gcm) = (" << std::setw(2) << l_lcm
+                          << ", " << std::setw(2) << l_gcm << ")" << std::endl;
             }
         }
 #endif  // DIPTEST_DEBUG
@@ -483,12 +482,12 @@ double diptst(
         if (l_gcm != 2 || l_lcm != 2) {
 #if defined(DIPTEST_DEBUG)
             if (debug) {
-                cout << "'dip': CYCLE-BEGIN: while(gcm[gcm_obj.y] "
-                     << "!= lcm[lcm_obj.y])";
+                std::cout << "'dip': CYCLE-BEGIN: while(gcm[gcm_obj.y] "
+                          << "!= lcm[lcm_obj.y])";
                 if (debug >= 2) {
-                    cout << endl;
+                    std::cout << std::endl;
                 } else {
-                    cout << " ";
+                    std::cout << " ";
                 }
             }
 #endif  // DIPTEST_DEBUG
@@ -496,17 +495,18 @@ double diptst(
             d = max_distance(gcm_obj, lcm_obj, debug);
 
 #if defined(DIPTEST_DEBUG)
-            if (debug && debug < 2)
-                cout << endl;
+            if (debug) {
+                std::cout << "'dip': distance " << d << std::endl;
+            }
 #endif  // DIPTEST_DEBUG
         } else {
             d = (min_is_0) ? 0. : 1.;
 
 #if defined(DIPTEST_DEBUG)
             if (debug)
-                cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = (" << setw(2)
-                     << l_lcm << ", " << setw(2) << l_gcm << ") ==> d := " << d
-                     << endl;
+                std::cout << "'dip': NO-CYCLE: (l_lcm, l_gcm) = ("
+                          << std::setw(2) << l_lcm << ", " << std::setw(2)
+                          << l_gcm << ") ==> d := " << d << std::endl;
 #endif  // DIPTEST_DEBUG
         }
 
@@ -516,7 +516,7 @@ double diptst(
         // Calculate the DIPs for the current LOW and HIGH
 #if defined(DIPTEST_DEBUG)
         if (debug)
-            cout << "'dip': MAIN-CALCULATION" << endl;
+            std::cout << "'dip': MAIN-CALCULATION" << std::endl;
 #endif  // DIPTEST_DEBUG
 
         // The DIP for the convex minorant.
@@ -527,8 +527,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
         if (debug)
-            cout << " (dip_l, dip_u) = (" << dip_l.val << ", " << dip_u.val
-                 << ")";
+            std::cout << " (dip_l, dip_u) = (" << dip_l.val << ", " << dip_u.val
+                      << ")";
 #endif  // DIPTEST_DEBUG
 
         // Determine the current maximum.
@@ -542,8 +542,9 @@ double diptst(
             dip_idx = tmp_dip.idx;
 #if defined(DIPTEST_DEBUG)
             if (debug)
-                cout << " --> new larger dip " << (tmp_dip.val)
-                     << " ( at index := " << (tmp_dip.idx) << " )" << endl;
+                std::cout << " --> new larger dip " << (tmp_dip.val)
+                          << " ( at index := " << (tmp_dip.idx) << " )"
+                          << std::endl;
 #endif  // DIPTEST_DEBUG
         }
 
@@ -555,8 +556,8 @@ double diptst(
 
 #if defined(DIPTEST_DEBUG)
     if (debug)
-        cout << "'dip': LOOP-END: No improvement found neither in low := "
-             << low << " nor in high := " << high << endl;
+        std::cout << "'dip': LOOP-END: No improvement found neither in low := "
+                  << low << " nor in high := " << high << std::endl;
 #endif  // DIPTEST_DEBUG
 
 L_END:
