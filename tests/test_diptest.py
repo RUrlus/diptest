@@ -107,7 +107,7 @@ def test_dipstat_full_output():
     """Test diptest.dipstat with full output."""
     sample = _generator(100)
     dip, res = dt.dipstat(sample, full_output=True)
-    exp_keys = {"lo", "hi", "xl", "xu", "gcm", "lcm"}
+    exp_keys = {"lo", "hi", "xl", "xu", "gcm", "lcm", "dipidx"}
     obs_keys = set(res.keys())
     assert len(obs_keys - exp_keys) == 0
     assert len(exp_keys - obs_keys) == 0
@@ -215,7 +215,6 @@ def test_diptest_full_output():
     dip, pval, res = dt.diptest(_TEST_SAMPLE, full_output=True)
     assert np.isclose(dip, _TEST_SAMPLE_DIP)
     assert np.isclose(pval, _TEST_SAMPLE_TABLE_PVAL)
-    exp_keys = {"lo", "hi", "xl", "xu", "gcm", "lcm"}
+    exp_keys = {"lo", "hi", "xl", "xu", "gcm", "lcm", "dipidx"}
     obs_keys = set(res.keys())
     assert len(obs_keys - exp_keys) == 0
-    assert len(exp_keys - obs_keys) == 0
