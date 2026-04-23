@@ -1,16 +1,58 @@
 /* wrapper.cpp -- implementation of wrapper around diptst from diptest.c
  * Copyright 2022 R. Urlus
  */
-#include <algorithm>  // sort
+#include <cmath>   // log
+#include <cstdint>
 #include <memory>
-#include <numeric>  // accumulate
-#include <random>   // uniform_real_distribution
 
 #include <diptest/bootstrap.hpp>
 
 namespace py = pybind11;
 
 namespace diptest {
+
+namespace details {
+
+template <typename RNG>
+inline double uniform_rvs(RNG& rng) {
+    constexpr double inv_2p53 = 0x1.0p-53;  // 2^-53
+    std::uint64_t r = rng();
+    std::uint64_t k = r >> 11;
+    return (static_cast<double>(k) + 1.0) * inv_2p53;
+}
+
+template <typename RNG>
+inline double exp1(RNG& rng) {
+    return -std::log(uniform_rvs(rng));
+}
+
+/*
+ * Generate n sorted Uniform(0,1) samples using exponential spacings.
+ *
+ * This method exploits the fact that normalized partial sums of i.i.d.
+ * Exponential(1) random variables have the same distribution as uniform
+ * order statistics. This avoids O(n log n) sorting of uniform samples.
+ *
+ * Reference: Devroye, L. (1986). Non-Uniform Random Variate Generation.
+ *            Springer-Verlag, Chapter 2, Section 2.2.
+ */
+template <typename RNG>
+inline void sorted_uniform_rvs(double* out, int_vt n, RNG& rng) {
+    double cumsum = 0.0;
+
+    for (int_vt i = 0; i < n; ++i) {
+        cumsum += exp1(rng);
+        out[i] = cumsum;
+    }
+    cumsum += exp1(rng);
+
+    const double inv_total = 1.0 / cumsum;
+    for (int_vt i = 0; i < n; ++i) {
+        out[i] *= inv_total;
+    }
+}
+
+}  // namespace details
 
 double diptest_pval(
     const double dipstat,
@@ -30,7 +72,6 @@ double diptest_pval(
     } else {
         rng.seed(seed);
     }
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
 
     std::array<int_vt, 5> lo_hi = {0, 0, 0, 0, 0};
     std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
@@ -40,14 +81,10 @@ double diptest_pval(
     std::unique_ptr<double[]> sample(new double[n]);
 
     double* r_sample = sample.get();
-    double* sample_end = r_sample + n;
 
     int64_t dip_cnt = 0;
     for (int64_t i = 0; i < n_boot; i++) {
-        for (int64_t j = 0; j < n; j++) {
-            r_sample[j] = dist(rng);
-        }
-        std::sort(r_sample, sample_end);
+        details::sorted_uniform_rvs(r_sample, n, rng);
         double dip = diptst<false>(
             r_sample,
             n,
@@ -93,7 +130,6 @@ double diptest_pval_mt(
         std::unique_ptr<double[]> sample(new double[n]);
 
         double* p_sample = sample.get();
-        double* p_sample_end = p_sample + n;
 
         // PCG family has different streams which are, in theory, independent of
         // each other. Hence, we can use the same seed and a different stream to
@@ -101,16 +137,10 @@ double diptest_pval_mt(
         // the whole block
         details::pcg64_dxsm rng = global_rng;
         rng.set_stream(omp_get_thread_num() + 1);
-        std::uniform_real_distribution<double> dist(0.0, 1.0);
 
 #pragma omp for reduction(+ : dip_cnt)
         for (int64_t i = 0; i < n_boot; i++) {
-            // refill the sample array with fresh draws
-            for (int64_t j = 0; j < n; j++) {
-                p_sample[j] = dist(rng);
-            }
-            // sort the allocated block for this bootstrap sample
-            std::sort(p_sample, p_sample_end);
+            details::sorted_uniform_rvs(p_sample, n, rng);
             dip_cnt += dipstat <= diptst<false>(
                            p_sample,
                            n,
