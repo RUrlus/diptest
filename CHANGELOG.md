@@ -1,5 +1,20 @@
 # Diptest Changelog
 
+## 0.11.0 -- April 2026
+
+This release significantly improves bootstrapping performance by avoiding the sorting of the generated uniform sample.
+Expected speed-up is ~2-3x for arrays as small as 50.
+
+### Changes
+
+* OPT: [C++] Generate sorted uniform values using ordered statistics 
+* OPT: [C++] Remove inefficient collect and accumulate pattern
+* BLD: [C++] Disable math-errno and trapping math
+* OPT: [C++] Minor performance optimisations
+* BLD: Switch to MacOS 13 as minimum deployment target
+
+**Full Changelog**: https://github.com/RUrlus/diptest/compare/v0.10.0...v0.11.0
+
 ## 0.10.0 -- July 2025
 
 ### Features
