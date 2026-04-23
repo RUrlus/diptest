@@ -37,12 +37,12 @@ double diptest_pval(
     std::unique_ptr<int_vt[]> lcm(new int_vt[n]);
     std::unique_ptr<int_vt[]> mn(new int_vt[n]);
     std::unique_ptr<int_vt[]> mj(new int_vt[n]);
-    std::unique_ptr<int_vt[]> dips(new int_vt[n_boot]);
     std::unique_ptr<double[]> sample(new double[n]);
 
     double* r_sample = sample.get();
     double* sample_end = r_sample + n;
 
+    int64_t dip_cnt = 0;
     for (int64_t i = 0; i < n_boot; i++) {
         for (int64_t j = 0; j < n; j++) {
             r_sample[j] = dist(rng);
@@ -59,14 +59,9 @@ double diptest_pval(
             allow_zero,
             debug
         );
-        dips[i] = dipstat <= dip;
+        dip_cnt += dipstat <= dip;
     }
-    int64_t accu = 0;
-    double p_val = static_cast<double>(
-                       std::accumulate(dips.get(), dips.get() + n_boot, accu)
-                   )
-                   / n_boot;
-    return p_val;
+    return static_cast<double>(dip_cnt) / n_boot;
 }  // diptest_pval
 
 #if defined(DIPTEST_HAS_OPENMP_SUPPORT)
@@ -79,7 +74,6 @@ double diptest_pval_mt(
     uint64_t seed,
     size_t n_threads
 ) {
-    std::unique_ptr<bool[]> dips(new bool[n_boot]);
     details::pcg64_dxsm global_rng;
     if (seed == 0) {
         details::pcg_seed_seq seed_source;
@@ -88,7 +82,8 @@ double diptest_pval_mt(
         global_rng.seed(seed);
     }
 
-#pragma omp parallel num_threads(n_threads) shared(dips, global_rng)
+    int64_t dip_cnt = 0;
+#pragma omp parallel num_threads(n_threads) shared(global_rng)
     {
         std::array<int_vt, 5> lo_hi = {0, 0, 0, 0, 0};
         std::unique_ptr<int_vt[]> gcm(new int_vt[n]);
@@ -108,7 +103,7 @@ double diptest_pval_mt(
         rng.set_stream(omp_get_thread_num() + 1);
         std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-#pragma omp for
+#pragma omp for reduction(+ : dip_cnt)
         for (int64_t i = 0; i < n_boot; i++) {
             // refill the sample array with fresh draws
             for (int64_t j = 0; j < n; j++) {
@@ -116,25 +111,20 @@ double diptest_pval_mt(
             }
             // sort the allocated block for this bootstrap sample
             std::sort(p_sample, p_sample_end);
-            dips[i] = dipstat <= diptst<false>(
-                          p_sample,
-                          n,
-                          lo_hi.data(),
-                          gcm.get(),
-                          lcm.get(),
-                          mn.get(),
-                          mj.get(),
-                          allow_zero,
-                          debug
-                      );
+            dip_cnt += dipstat <= diptst<false>(
+                           p_sample,
+                           n,
+                           lo_hi.data(),
+                           gcm.get(),
+                           lcm.get(),
+                           mn.get(),
+                           mj.get(),
+                           allow_zero,
+                           debug
+                       );
         }
     }  // pragma parallel
-    int64_t accu = 0;
-    double p_val = static_cast<double>(
-                       std::accumulate(dips.get(), dips.get() + n_boot, accu)
-                   )
-                   / n_boot;
-    return p_val;
+    return static_cast<double>(dip_cnt) / n_boot;
 }  // diptest_pval_mt
 #endif
 
