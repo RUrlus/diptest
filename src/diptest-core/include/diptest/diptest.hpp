@@ -61,17 +61,36 @@
  *
  */
 #pragma once
+
+#if defined(_MSC_VER)
+#define DIPTEST_RESTRICT __restrict
+#elif defined(__GNUC__) || defined(__clang__)
+#define DIPTEST_RESTRICT __restrict__
+#else
+#define DIPTEST_RESTRICT
+#endif
+
+#if defined(__GNUC__) || defined(__clang__)
+#define DIPTEST_LIKELY(x) __builtin_expect(!!(x), 1)
+#define DIPTEST_UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define DIPTEST_LIKELY(x) (x)
+#define DIPTEST_UNLIKELY(x) (x)
+#endif
+
 #define UNUSED(expr)  \
     do {              \
         (void)(expr); \
     } while (0)
 
-#include <cassert>   // for assert
-#include <cmath>     // for isgreaterequal
+#include <cassert>    // for assert
+#include <cmath>      // for isgreaterequal
+#include <stdexcept>  // for runtime_error
+
+#if defined(DIPTEST_DEBUG)
 #include <iomanip>   // for setw
 #include <iostream>  // for cout
-#include <iterator>  // for iterators
-#include <vector>    // for vectors
+#endif
 //
 
 #if defined(DIPTEST_64BIT_INDEX)
@@ -239,12 +258,14 @@ class ConvexEnvelope {
                    j_end = optimum[j + offset];
 
             if (j_end - j_start > 1 && arr[j_end] != arr[j_start]) {
-                double C = (j_end - j_start) / (arr[j_end] - arr[j_start]);
+                const double C
+                    = (j_end - j_start) / (arr[j_end] - arr[j_start]);
+                const double arr_j_start = arr[j_start];
 
                 for (int_vt jj = j_start; jj <= j_end; ++jj) {
                     double d = sign
                                * ((jj - j_start + sign)
-                                  - (arr[jj] - arr[j_start]) * C);
+                                  - (arr[jj] - arr_j_start) * C);
 
                     tmp_dip.maybe_update(d, jj);
                 }
@@ -350,13 +371,13 @@ inline double max_distance(
 // Subroutine
 template <bool check>
 double diptst(
-    const double x[],
+    const double* DIPTEST_RESTRICT x,
     const int_vt n,
-    int_vt* lo_hi,
-    int_vt* gcm,
-    int_vt* lcm,
-    int_vt* mn,
-    int_vt* mj,
+    int_vt* DIPTEST_RESTRICT lo_hi,
+    int_vt* DIPTEST_RESTRICT gcm,
+    int_vt* DIPTEST_RESTRICT lcm,
+    int_vt* DIPTEST_RESTRICT mn,
+    int_vt* DIPTEST_RESTRICT mj,
     const int min_is_0,
     const int debug
 ) {
@@ -394,14 +415,14 @@ double diptst(
     // Perform the two consistency checks:
 
     // A. non-positive check:
-    if (check && n <= 0) {
+    if (check && DIPTEST_UNLIKELY(n <= 0)) {
         throw std::runtime_error("N must be >= 1.");
     }
 
     // B. non-sorted array check:
     if (check) {
         for (i = 2; i <= n; ++i)
-            if (x[i] < x[i - 1]) {
+            if (DIPTEST_UNLIKELY(x[i] < x[i - 1])) {
                 throw std::runtime_error("Encountered non-sorted array.");
             }
     }
