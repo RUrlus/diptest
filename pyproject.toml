@@ -32,7 +32,7 @@ sdist.include = [
 ]
 
 [tool.scikit-build.cmake.define]
-CMAKE_OSX_DEPLOYMENT_TARGET = "12.0"
+CMAKE_OSX_DEPLOYMENT_TARGET = "13.0"
 DIPTEST_CPP_STANDARD = "11"
 DIPTEST_ENABLE_DEVMODE = false
 DIPTEST_ENABLE_DEBUG = false
@@ -74,7 +74,7 @@ repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
-environment = { MACOSX_DEPLOYMENT_TARGET = "12.0", CMAKE_ARGS = "-DDIPTEST_ENABLE_ARCH_FLAGS=OFF" }
+environment = { MACOSX_DEPLOYMENT_TARGET = "13.0", CMAKE_ARGS = "-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0" }
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} --exclude libomp.dylib"
 
 [tool.cibuildwheel.windows]
