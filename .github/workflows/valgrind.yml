@@ -77,4 +77,14 @@ jobs:
 
       - name: Test
         run: |
-          PYTHONMALLOC=malloc valgrind --leak-check=yes --track-origins=yes --log-file=valgrind-log.txt python -m pytest tests/test_diptest.py
+          NPY_DISABLE_CPU_FEATURES="AVX512F AVX512CD AVX512_SKX AVX512_CLX AVX512_CNL AVX512_ICL AVX2 FMA3 AVX" \
+          PYTHONMALLOC=malloc \
+          valgrind --leak-check=yes --track-origins=yes --log-file=valgrind-log.txt \
+          python -m pytest tests/test_diptest.py
+
+      - name: Upload valgrind log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valgrind-log
+          path: valgrind-log.txt
