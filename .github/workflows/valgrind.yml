@@ -64,6 +64,7 @@ jobs:
               -DDIPTEST_MBUILD=ON \
               -DDIPTEST_ENABLE_DEBUG=OFF \
               -DDIPTEST_ENABLE_OPENMP=OFF \
+              -DDIPTEST_ENABLE_ARCH_FLAGS=OFF \
               -Dpybind11_DIR=$(python3 -c 'import pybind11; print(pybind11.get_cmake_dir())') \
               -DCMAKE_C_COMPILER=gcc-14 \
               -DCMAKE_CXX_COMPILER=g++-14
