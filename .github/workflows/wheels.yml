@@ -73,7 +73,7 @@ jobs:
         mkdir openmp_build
         cmake -S openmp -B openmp_build \
             -DCMAKE_OSX_ARCHITECTURES="arm64" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET="12.0" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="13.0" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -130,7 +130,7 @@ jobs:
         mkdir openmp_build
         cmake -S openmp -B openmp_build \
             -DCMAKE_OSX_ARCHITECTURES="x86_64" \
-            -DCMAKE_OSX_DEPLOYMENT_TARGET="12.0" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET="13.0" \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -141,7 +141,7 @@ jobs:
       env:
         # only build for x86_64, arm wheels are build seperately
         CIBW_ARCHS: "x86_64"
-        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="12.0" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_VENDOR_OPENMP=ON -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=/usr/local"
+        CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET="13.0" CMAKE_ARGS="-DDIPTEST_ENABLE_ARCH_FLAGS=OFF -DDIPTEST_VENDOR_OPENMP=ON -DDIPTEST_ENABLE_OPENMP=ON -DOpenMP_ROOT=/usr/local"
 
     - name: Verify clean directory
       run: git diff --exit-code
