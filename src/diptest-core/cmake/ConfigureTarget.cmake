@@ -118,6 +118,13 @@ function(check_cxx_support FLAG DEST)
 endfunction()
 
 # -- Compiler Flags
+if(NOT MSVC)
+    target_compile_options(_diptest_core PRIVATE
+        $<$<CONFIG:RELEASE>:-fno-math-errno>
+        $<$<CONFIG:RELEASE>:-fno-trapping-math>
+    )
+endif()
+
 if (DIPTEST_ENABLE_ARCH_FLAGS AND "${CMAKE_CXX_FLAGS}" STREQUAL "${CMAKE_CXX_FLAGS_DEFAULT}")
     set(DIPTEST_ARCHITECTURE_FLAGS "")
     if (APPLE AND (${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm64"))
