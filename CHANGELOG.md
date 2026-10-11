@@ -1,5 +1,15 @@
 # Diptest Changelog
 
+## Unreleased
+
+### Changes
+
+* BLD: Support free-threaded CPython; ship cp314t, cp315 and cp315t wheels
+* BLD: Drop psutil dependency, the number of cores is now determined with `os.process_cpu_count`/`os.cpu_count`
+* BLD: Drop cp38 wheels, the sdist still supports Python 3.8
+* BLD: Fix sdist include path for the C++ sources
+* CICD: Bump cibuildwheel from 3.4.1 to 4.3.1
+
 ## 0.11.0 -- April 2026
 
 This release significantly improves bootstrapping performance by avoiding the sorting of the generated uniform sample.

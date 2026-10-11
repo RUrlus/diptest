@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import os
 import warnings
 from typing import TYPE_CHECKING
 
 import numpy as np
-import psutil
 
 from diptest.consts import Consts
 from diptest.lib import _diptest_core as _diptest
@@ -12,7 +12,9 @@ from diptest.lib import _diptest_core as _diptest
 if TYPE_CHECKING:
     from typing import Any
 
-_N_CORES = psutil.cpu_count(logical=False)
+# ``process_cpu_count`` respects the CPU affinity mask but is only available
+# on Python 3.13+
+_N_CORES = (getattr(os, "process_cpu_count", None) or os.cpu_count)() or 1
 _N_CORES_MIN1 = _N_CORES - 1
 
 _DEFAULT_N_THREADS = min(_N_CORES_MIN1, 4) if _diptest._has_openmp_support else 1

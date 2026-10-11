@@ -11,7 +11,7 @@
 namespace diptest {
 namespace bindings {
 
-PYBIND11_MODULE(_diptest_core, m) {
+PYBIND11_MODULE(_diptest_core, m, py::mod_gil_not_used()) {
     bind_diptest(m);
     bind_diptest_full(m);
     bind_diptest_pval(m);
