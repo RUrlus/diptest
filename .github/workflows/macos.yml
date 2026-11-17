@@ -1,11 +1,11 @@
 name: MacOS build
 
-on: 
+on:
   pull_request:
     branches:
       - stable
   schedule:
-    - cron: '0 23 * * 1'
+    - cron: "0 23 * * 1"
   push:
     branches:
       - stable
@@ -26,7 +26,7 @@ jobs:
         uses: fkirc/skip-duplicate-actions@master
         with:
           # All of these options are optional, so you can remove them if you are happy with the defaults
-          cancel_others: 'true'
+          cancel_others: "true"
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
   build:
     name: Python ${{ matrix.python-version }}
@@ -36,16 +36,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.14t", "3.15", "3.15t"]
-        config: 
-        - {
-            name: "macOS (Clang)",
-            build_type: "Release",
-            cc: "clang",
-            cxx: "clang++",
-            generators: "Ninja",
-            target: "all"
-          }
+        python-version:
+          ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t", "3.15", "3.15t"]
+        config:
+          - {
+              name: "macOS (Clang)",
+              build_type: "Release",
+              cc: "clang",
+              cxx: "clang++",
+              generators: "Ninja",
+              target: "all",
+            }
 
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it

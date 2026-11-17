@@ -1,11 +1,11 @@
 name: Linux Build
 
-on: 
+on:
   pull_request:
     branches:
       - stable
   schedule:
-    - cron: '0 23 * * 1'
+    - cron: "0 23 * * 1"
   push:
     branches:
       - stable
@@ -16,17 +16,14 @@ defaults:
 
 jobs:
   pre_job:
-    # continue-on-error: true # Uncomment once integration is finished
     runs-on: ubuntu-latest
-    # Map a step output to a job output
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
         uses: fkirc/skip-duplicate-actions@master
         with:
-          # All of these options are optional, so you can remove them if you are happy with the defaults
-          cancel_others: 'true'
+          cancel_others: "true"
           do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
   build:
     name: Python ${{ matrix.python-version }}
@@ -36,19 +33,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "3.14t", "3.15", "3.15t"]
-        config: 
-        - {
-            name: "Ubuntu (GCC-14)",
-            build_type: "Release",
-            cc: "gcc-14",
-            cxx: "g++-14",
-            generators: "Ninja",
-            target: "all"
-          }
+        python-version:
+          ["3.10", "3.11", "3.12", "3.13", "3.14", "3.14t", "3.15", "3.15t"]
+        config:
+          - {
+              name: "Ubuntu (GCC-14)",
+              build_type: "Release",
+              cc: "gcc",
+              cxx: "g++",
+              generators: "Ninja",
+              target: "all",
+            }
 
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v7
         with:
           submodules: true
